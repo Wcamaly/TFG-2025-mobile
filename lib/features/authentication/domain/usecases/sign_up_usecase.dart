@@ -1,0 +1,34 @@
+import 'package:dartz/dartz.dart';
+import 'package:equatable/equatable.dart';
+import '../../../../core/error/failures.dart';
+import '../entities/user.dart';
+import '../repositories/auth_repository.dart';
+
+class SignUpUseCase {
+  final AuthRepository repository;
+
+  SignUpUseCase(this.repository);
+
+  Future<Either<Failure, User>> call(SignUpParams params) {
+    return repository.signUp(
+      email: params.email,
+      password: params.password,
+      name: params.name,
+    );
+  }
+}
+
+class SignUpParams extends Equatable {
+  final String email;
+  final String password;
+  final String name;
+
+  const SignUpParams({
+    required this.email,
+    required this.password,
+    required this.name,
+  });
+
+  @override
+  List<Object?> get props => [email, password, name];
+}
