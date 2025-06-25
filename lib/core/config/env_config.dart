@@ -5,8 +5,9 @@ class EnvConfig {
   static const String apiBaseUrl = 'https://api.gymnestic.com';
 
   // Google Maps API Key - TEMPORAL PARA PRUEBAS
-  // IMPORTANTE: Reemplazar con tu API key real de Google Cloud Console
-  static const String googleMapsApiKey = 'YOUR_ACTUAL_API_KEY_HERE';
+  // IMPORTANTE: Esta debe coincidir con la configurada en Android/iOS
+  static const String googleMapsApiKey =
+      'AIzaSyBKDOjEk3pHQDUGhPMRdD46oLKGK6xHAXM';
 
   // Firebase Configuration
   static const bool enableCrashlytics = true;

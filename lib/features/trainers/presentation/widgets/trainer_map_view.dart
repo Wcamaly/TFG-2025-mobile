@@ -20,12 +20,29 @@ class TrainerMapView extends StatefulWidget {
   State<TrainerMapView> createState() => _TrainerMapViewState();
 }
 
-class _TrainerMapViewState extends State<TrainerMapView> {
+class _TrainerMapViewState extends State<TrainerMapView>
+    with AutomaticKeepAliveClientMixin {
   GoogleMapController? _mapController;
   Position? _currentPosition;
   Set<Marker> _markers = {};
   bool _isLoading = true;
   String? _errorMessage;
+
+  // ✅ Future que se crea una sola vez para evitar el bucle infinito
+  Future<void>? _mapLoadingFuture;
+
+  // ✅ Key único para evitar recreación de vistas
+  static const Key _mapKey = Key('google_map_widget_unique');
+
+  // ✅ Flag para controlar si el mapa ya fue creado
+  bool _isMapCreated = false;
+
+  // ✅ Flag para evitar múltiples inicializaciones
+  bool _isInitializing = false;
+
+  // ✅ Mantener el estado del widget vivo
+  @override
+  bool get wantKeepAlive => true;
 
   // Madrid como ubicación por defecto
   static const CameraPosition _initialPosition = CameraPosition(
@@ -36,7 +53,26 @@ class _TrainerMapViewState extends State<TrainerMapView> {
   @override
   void initState() {
     super.initState();
-    _initializeMap();
+    // ✅ Inicializar el Future una sola vez
+    _mapLoadingFuture = _loadMapSafely();
+    _initializeMapSafely();
+  }
+
+  // ✅ Inicialización segura para evitar múltiples llamadas
+  Future<void> _initializeMapSafely() async {
+    if (_isInitializing) {
+      if (kDebugMode) {
+        print('⚠️ Inicialización ya en progreso, saltando...');
+      }
+      return;
+    }
+
+    _isInitializing = true;
+    try {
+      await _initializeMap();
+    } finally {
+      _isInitializing = false;
+    }
   }
 
   Future<void> _initializeMap() async {
@@ -115,10 +151,10 @@ class _TrainerMapViewState extends State<TrainerMapView> {
       return Marker(
         markerId: MarkerId(trainer.id),
         position: LatLng(trainer.latitude, trainer.longitude),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
         infoWindow: InfoWindow(
           title: trainer.name,
-          snippet: trainer.specialization,
+          snippet: '⭐ ${trainer.rating} • ${trainer.specialization}',
           onTap: () {
             Navigator.pushNamed(
               context,
@@ -140,13 +176,21 @@ class _TrainerMapViewState extends State<TrainerMapView> {
           markerId: const MarkerId('current_location'),
           position:
               LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          icon:
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
           infoWindow: const InfoWindow(
-            title: 'Tu ubicación',
+            title: '📍 Tu ubicación',
             snippet: 'Estás aquí',
           ),
         ),
       );
+    }
+
+    if (kDebugMode) {
+      print('🗺️ Marcadores creados: ${_markers.length}');
+      print('🗺️ Entrenadores: ${widget.trainers.length}');
+      print(
+          '🗺️ Ubicación actual: ${_currentPosition != null ? 'Disponible' : 'No disponible'}');
     }
   }
 
@@ -266,6 +310,8 @@ class _TrainerMapViewState extends State<TrainerMapView> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // ✅ Requerido para AutomaticKeepAliveClientMixin
+
     if (_isLoading) {
       return const Center(
         child: Column(
@@ -287,9 +333,17 @@ class _TrainerMapViewState extends State<TrainerMapView> {
       print('🗺️ Construyendo widget del mapa...');
     }
 
+    // ✅ Si el mapa ya fue creado, mostrar directamente el widget
+    if (_isMapCreated && _mapController != null) {
+      if (kDebugMode) {
+        print('🗺️ Reutilizando mapa ya creado');
+      }
+      return _buildMapWidget();
+    }
+
     // Usar un FutureBuilder para cargar el mapa de forma asíncrona
     return FutureBuilder<void>(
-      future: _loadMapSafely(),
+      future: _mapLoadingFuture,
       builder: (context, snapshot) {
         if (kDebugMode) {
           print('🗺️ ConnectionState: ${snapshot.connectionState}');
@@ -335,7 +389,7 @@ class _TrainerMapViewState extends State<TrainerMapView> {
   Future<void> _loadMapSafely() async {
     try {
       if (kDebugMode) {
-        print('🗺️ Iniciando carga segura del mapa...');
+        print('🗺️ Iniciando validación para carga del mapa...');
       }
 
       // 1. Validar que Google Maps API Key esté configurada
@@ -346,64 +400,36 @@ class _TrainerMapViewState extends State<TrainerMapView> {
         throw Exception('API Key de Google Maps no configurada correctamente');
       }
 
-      // 2. Verificar permisos de ubicación
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          if (kDebugMode) {
-            print('⚠️ Permisos de ubicación denegados');
-          }
-          // Continuar sin ubicación actual
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        if (kDebugMode) {
-          print('⚠️ Permisos de ubicación denegados permanentemente');
-        }
-        // Continuar sin ubicación actual
-      }
-
-      // 3. Verificar que el servicio de ubicación esté habilitado
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        if (kDebugMode) {
-          print('⚠️ Servicios de ubicación deshabilitados');
-        }
-        // Continuar sin ubicación actual
-      }
-
-      // 4. Simular tiempo de carga para evitar race conditions
-      await Future.delayed(const Duration(milliseconds: 200));
-
-      // 5. Validar que el widget siga mounted
+      // 2. Validar que el widget siga mounted
       if (!mounted) {
         throw Exception('Widget disposed durante la carga');
       }
 
-      // 6. Verificar que tenemos entrenadores para mostrar
+      // 3. Verificar que tenemos entrenadores para mostrar
       if (widget.trainers.isEmpty) {
         if (kDebugMode) {
           print('⚠️ No hay entrenadores para mostrar en el mapa');
         }
       }
 
+      // 4. Pequeña pausa para evitar race conditions
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // 5. Validar nuevamente que el widget siga mounted después del delay
+      if (!mounted) {
+        throw Exception('Widget disposed durante la carga');
+      }
+
       if (kDebugMode) {
-        print('✅ Mapa cargado de forma segura');
+        print('✅ Validación del mapa completada exitosamente');
         print(
             '✅ API Key válida: ${RemoteConfigService.googleMapsApiKey.substring(0, 10)}...');
-        print('✅ Permisos de ubicación: $permission');
-        print('✅ Servicios de ubicación: $serviceEnabled');
         print('✅ Entrenadores a mostrar: ${widget.trainers.length}');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error en carga segura del mapa: $e');
-        print('❌ Stack trace: ${StackTrace.current}');
+        print('❌ Error en validación del mapa: $e');
       }
-
-      // Re-lanzar la excepción para que el FutureBuilder la capture
       rethrow;
     }
   }
@@ -425,54 +451,206 @@ class _TrainerMapViewState extends State<TrainerMapView> {
         return _buildMapFallback();
       }
 
-      return Container(
-        child: GoogleMap(
-          key: const Key('google_map_widget'),
-          onMapCreated: (GoogleMapController controller) {
-            try {
-              if (kDebugMode) {
-                print('🗺️ ¡Mapa creado exitosamente!');
-              }
-              if (mounted) {
-                setState(() {
-                  _mapController = controller;
-                });
+      // Crear marcadores si no existen
+      if (_markers.isEmpty) {
+        _createTrainerMarkers();
+      }
 
-                // Mover a la ubicación actual si está disponible
-                if (_currentPosition != null) {
-                  controller.animateCamera(
-                    CameraUpdate.newLatLng(
-                      LatLng(_currentPosition!.latitude,
-                          _currentPosition!.longitude),
-                    ),
-                  );
+      return Container(
+        height: double.infinity,
+        width: double.infinity,
+        child: Stack(
+          children: [
+            // Mapa principal
+            GoogleMap(
+              key: _mapKey, // ✅ Usar key único
+              onMapCreated: (GoogleMapController controller) async {
+                try {
+                  // ✅ Evitar recreación múltiple
+                  if (_isMapCreated) {
+                    if (kDebugMode) {
+                      print('⚠️ Mapa ya fue creado, evitando recreación');
+                    }
+                    return;
+                  }
+
+                  if (kDebugMode) {
+                    print('🗺️ ¡Mapa creado exitosamente!');
+                    print('🗺️ Controlador recibido: ${controller.toString()}');
+                    print('🗺️ Marcadores disponibles: ${_markers.length}');
+                  }
+
+                  if (mounted) {
+                    // ✅ Marcar como creado ANTES de cualquier operación async
+                    _isMapCreated = true;
+                    _mapController = controller;
+
+                    // ✅ Actualizar estado una sola vez
+                    setState(() {});
+
+                    // ✅ Operaciones async en segundo plano
+                    _configureMapAsync(controller);
+                  }
+                } catch (e) {
+                  if (kDebugMode) {
+                    print('❌ Error al configurar controlador: $e');
+                  }
                 }
-              }
-            } catch (e) {
-              if (kDebugMode) {
-                print('❌ Error al configurar controlador: $e');
-              }
-            }
-          },
-          initialCameraPosition: _initialPosition,
-          markers: _markers.isNotEmpty ? _markers : <Marker>{},
-          myLocationEnabled: false,
-          myLocationButtonEnabled: false,
-          zoomControlsEnabled: true,
-          mapToolbarEnabled: false,
-          compassEnabled: true,
-          rotateGesturesEnabled: true,
-          scrollGesturesEnabled: true,
-          tiltGesturesEnabled: true,
-          zoomGesturesEnabled: true,
-          mapType: MapType.normal,
-          onCameraMove: (CameraPosition position) {
-            // Log opcional para verificar que el mapa responde
-            if (kDebugMode && mounted) {
-              print(
-                  '🗺️ Cámara movida a: ${position.target.latitude}, ${position.target.longitude}');
-            }
-          },
+              },
+              initialCameraPosition: _initialPosition,
+              markers: _markers,
+              myLocationEnabled: false,
+              myLocationButtonEnabled:
+                  false, // Usaremos nuestro botón personalizado
+              zoomControlsEnabled: false, // Usaremos controles personalizados
+              mapToolbarEnabled: false,
+              compassEnabled: true,
+              rotateGesturesEnabled: true,
+              scrollGesturesEnabled: true,
+              tiltGesturesEnabled: true,
+              zoomGesturesEnabled: true,
+              mapType: MapType.normal,
+              minMaxZoomPreference: const MinMaxZoomPreference(8.0, 18.0),
+              // ✅ Configuraciones adicionales para asegurar que el mapa se muestre
+              buildingsEnabled: true,
+              indoorViewEnabled: true,
+              trafficEnabled: false,
+              onCameraMove: (CameraPosition position) {
+                // Log opcional para verificar que el mapa responde
+                if (kDebugMode && mounted) {
+                  print(
+                      '🗺️ Cámara movida a: ${position.target.latitude}, ${position.target.longitude}');
+                }
+              },
+            ),
+
+            // Controles flotantes personalizados
+            Positioned(
+              top: 16,
+              right: 16,
+              child: Column(
+                children: [
+                  // Botón de ubicación actual
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      onPressed: _goToCurrentLocation,
+                      icon: const Icon(
+                        Icons.my_location,
+                        color: AppColors.primary,
+                      ),
+                      tooltip: 'Mi ubicación',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Controles de zoom
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        IconButton(
+                          onPressed: _zoomIn,
+                          icon: const Icon(
+                            Icons.add,
+                            color: AppColors.primary,
+                          ),
+                          tooltip: 'Acercar',
+                        ),
+                        Container(
+                          width: 24,
+                          height: 1,
+                          color: AppColors.textSecondary.withOpacity(0.3),
+                        ),
+                        IconButton(
+                          onPressed: _zoomOut,
+                          icon: const Icon(
+                            Icons.remove,
+                            color: AppColors.primary,
+                          ),
+                          tooltip: 'Alejar',
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Información flotante en la parte inferior
+            Positioned(
+              bottom: 16,
+              left: 16,
+              right: 16,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.surface.withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.location_on,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${widget.trainers.length} entrenadores disponibles',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Mostrar lista de entrenadores
+                        _showTrainersList();
+                      },
+                      child: Text(
+                        'Ver Lista',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       );
     } catch (e) {
@@ -481,6 +659,352 @@ class _TrainerMapViewState extends State<TrainerMapView> {
         print('❌ Stack trace: ${StackTrace.current}');
       }
       return _buildMapFallback();
+    }
+  }
+
+  // ✅ Método para aplicar tema oscuro personalizado al mapa
+  Future<void> _applyDarkMapStyle(GoogleMapController controller) async {
+    try {
+      // ✅ Verificar que el controlador esté disponible y el widget mounted
+      if (!mounted) {
+        if (kDebugMode) {
+          print('⚠️ Widget no mounted, saltando aplicación de tema');
+        }
+        return;
+      }
+
+      if (kDebugMode) {
+        print('🎨 Aplicando tema oscuro al mapa...');
+      }
+
+      // ✅ Tema oscuro más simple para evitar errores
+      const String darkMapStyle = '''[
+        {
+          "elementType": "geometry",
+          "stylers": [{"color": "#212121"}]
+        },
+        {
+          "elementType": "labels.text.fill",
+          "stylers": [{"color": "#757575"}]
+        },
+        {
+          "elementType": "labels.text.stroke",
+          "stylers": [{"color": "#212121"}]
+        },
+        {
+          "featureType": "administrative",
+          "elementType": "geometry",
+          "stylers": [{"color": "#757575"}]
+        },
+        {
+          "featureType": "administrative.country",
+          "elementType": "labels.text.fill",
+          "stylers": [{"color": "#9e9e9e"}]
+        },
+        {
+          "featureType": "road",
+          "elementType": "geometry.fill",
+          "stylers": [{"color": "#2c2c2c"}]
+        },
+        {
+          "featureType": "road",
+          "elementType": "labels.text.fill",
+          "stylers": [{"color": "#8a8a8a"}]
+        },
+        {
+          "featureType": "water",
+          "elementType": "geometry",
+          "stylers": [{"color": "#000000"}]
+        },
+        {
+          "featureType": "water",
+          "elementType": "labels.text.fill",
+          "stylers": [{"color": "#3d3d3d"}]
+        }
+      ]''';
+
+      await controller.setMapStyle(darkMapStyle);
+
+      if (kDebugMode) {
+        print('✅ Tema oscuro aplicado exitosamente');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ Error al aplicar tema oscuro: $e');
+        print('⚠️ Intentando resetear a tema por defecto...');
+      }
+
+      // Intentar resetear a tema por defecto
+      try {
+        await controller.setMapStyle(null);
+        if (kDebugMode) {
+          print('✅ Tema resetado a por defecto');
+        }
+      } catch (resetError) {
+        if (kDebugMode) {
+          print('❌ Error al resetear tema: $resetError');
+        }
+      }
+    }
+  }
+
+  // ✅ Configuración asíncrona del mapa para evitar bloqueos
+  Future<void> _configureMapAsync(GoogleMapController controller) async {
+    try {
+      if (!mounted) return;
+
+      // Aplicar tema oscuro personalizado con delay
+      await Future.delayed(const Duration(milliseconds: 1000));
+      if (mounted) {
+        await _applyDarkMapStyle(controller);
+      }
+
+      // Mover a la ubicación actual si está disponible
+      if (_currentPosition != null && mounted) {
+        await controller.animateCamera(
+          CameraUpdate.newLatLng(
+            LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+          ),
+        );
+      }
+
+      if (kDebugMode) {
+        print('✅ Configuración asíncrona del mapa completada');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error en configuración asíncrona: $e');
+      }
+    }
+  }
+
+  // ✅ Métodos para controles personalizados del mapa
+  void _goToCurrentLocation() async {
+    if (_mapController != null) {
+      if (_currentPosition != null) {
+        await _mapController!.animateCamera(
+          CameraUpdate.newLatLng(
+            LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+          ),
+        );
+      } else {
+        // Intentar obtener ubicación actual
+        try {
+          Position position = await LocationService.getCurrentLocation();
+          setState(() {
+            _currentPosition = position;
+          });
+          _createTrainerMarkers(); // Recrear marcadores con la nueva ubicación
+
+          await _mapController!.animateCamera(
+            CameraUpdate.newLatLng(
+              LatLng(position.latitude, position.longitude),
+            ),
+          );
+        } catch (e) {
+          if (kDebugMode) {
+            print('❌ Error al obtener ubicación: $e');
+          }
+        }
+      }
+    }
+  }
+
+  void _zoomIn() async {
+    if (_mapController != null) {
+      await _mapController!.animateCamera(CameraUpdate.zoomIn());
+    }
+  }
+
+  void _zoomOut() async {
+    if (_mapController != null) {
+      await _mapController!.animateCamera(CameraUpdate.zoomOut());
+    }
+  }
+
+  void _showTrainersList() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.3,
+        maxChildSize: 0.9,
+        builder: (context, scrollController) => Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              // Handle bar
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.textSecondary.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Header
+              Row(
+                children: [
+                  const Icon(
+                    Icons.location_on,
+                    color: AppColors.primary,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Entrenadores Disponibles',
+                    style: AppTextStyles.headlineMedium.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                    color: AppColors.textSecondary,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Lista de entrenadores
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: widget.trainers.length,
+                  itemBuilder: (context, index) {
+                    final trainer = widget.trainers[index];
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.textSecondary.withOpacity(0.2),
+                        ),
+                      ),
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.primary.withOpacity(0.1),
+                          ),
+                          child: const Icon(
+                            Icons.person,
+                            color: AppColors.primary,
+                            size: 24,
+                          ),
+                        ),
+                        title: Text(
+                          trainer.name,
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4),
+                            Text(
+                              trainer.specialization,
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.star,
+                                  color: AppColors.warning,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  trainer.rating.toString(),
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                const Icon(
+                                  Icons.location_on,
+                                  color: AppColors.textSecondary,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    trainer.location,
+                                    style: AppTextStyles.bodySmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        trailing: IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            // Ir al marcador del entrenador en el mapa
+                            _goToTrainerLocation(trainer);
+                          },
+                          icon: const Icon(
+                            Icons.map,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(
+                            context,
+                            '/trainer-detail',
+                            arguments: trainer,
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _goToTrainerLocation(Trainer trainer) async {
+    if (_mapController != null) {
+      await _mapController!.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(trainer.latitude, trainer.longitude),
+          16.0,
+        ),
+      );
+
+      // Mostrar el bottom sheet del entrenador después de un breve delay
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          _showTrainerBottomSheet(trainer);
+        }
+      });
     }
   }
 
@@ -517,6 +1041,8 @@ class _TrainerMapViewState extends State<TrainerMapView> {
               setState(() {
                 _isLoading = true;
                 _errorMessage = null;
+                // ✅ Reiniciar el Future para evitar usar el anterior
+                _mapLoadingFuture = _loadMapSafely();
               });
               _initializeMap();
             },
@@ -568,6 +1094,8 @@ class _TrainerMapViewState extends State<TrainerMapView> {
                     setState(() {
                       _isLoading = true;
                       _errorMessage = null;
+                      // ✅ Reiniciar el Future para evitar usar el anterior
+                      _mapLoadingFuture = _loadMapSafely();
                     });
                     _initializeMap();
                   },
@@ -788,6 +1316,8 @@ class _TrainerMapViewState extends State<TrainerMapView> {
                 setState(() {
                   _isLoading = true;
                   _errorMessage = null;
+                  // ✅ Reiniciar el Future para evitar usar el anterior
+                  _mapLoadingFuture = _loadMapSafely();
                 });
                 _initializeMap();
               },
@@ -807,7 +1337,20 @@ class _TrainerMapViewState extends State<TrainerMapView> {
 
   @override
   void dispose() {
-    _mapController?.dispose();
+    // ✅ Limpiar recursos del mapa de forma segura
+    try {
+      if (_mapController != null) {
+        _mapController?.dispose();
+        _mapController = null;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ Error al limpiar controlador del mapa: $e');
+      }
+    }
+
+    _isMapCreated = false;
+    _isInitializing = false;
     super.dispose();
   }
 }
