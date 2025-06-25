@@ -10,6 +10,7 @@ import '../../../authentication/presentation/providers/auth_provider.dart';
 import '../../../trainers/presentation/pages/trainer_search_page.dart';
 import '../../../workouts/presentation/pages/workouts_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
+import 'tabs/nutrition_tab.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
@@ -219,74 +220,7 @@ class HomeTab extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-            const NutritionCardSimple(
-              calories: 1800,
-              protein: 120,
-              carbs: 200,
-              fats: 60,
-            ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class NutritionTab extends StatelessWidget {
-  const NutritionTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Nutrition',
-                style: AppTextStyles.displayMedium.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.restaurant_menu_outlined,
-                      size: 80,
-                      color: AppColors.primary.withOpacity(0.6),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Nutrition Coming Soon',
-                      style: AppTextStyles.headlineMedium.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Track your meals and nutrition goals',
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

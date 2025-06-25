@@ -203,7 +203,7 @@ class FoodComparisonWidget extends StatelessWidget {
                           children: [
                             Text(
                               analysis.food.name,
-                              style: AppTextStyles.titleMedium.copyWith(
+                              style: AppTextStyles.headlineMedium.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),

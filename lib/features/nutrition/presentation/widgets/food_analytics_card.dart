@@ -11,6 +11,70 @@ class FoodAnalyticsCard extends StatelessWidget {
     required this.analytics,
   });
 
+  // Helper method to get category-specific icons
+  IconData _getCategoryIcon(String category) {
+    switch (category.toLowerCase()) {
+      case 'protein':
+        return Icons.set_meal;
+      case 'fruit':
+        return Icons.apple;
+      case 'vegetable':
+        return Icons.eco;
+      case 'grain':
+        return Icons.grain;
+      case 'dairy':
+        return Icons.local_drink;
+      case 'nuts':
+        return Icons.scatter_plot;
+      default:
+        return Icons.restaurant;
+    }
+  }
+
+  // Helper method to get category-specific colors
+  Color _getCategoryColor(String category) {
+    switch (category.toLowerCase()) {
+      case 'protein':
+        return Colors.red.shade400;
+      case 'fruit':
+        return Colors.orange.shade400;
+      case 'vegetable':
+        return Colors.green.shade400;
+      case 'grain':
+        return Colors.amber.shade400;
+      case 'dairy':
+        return Colors.blue.shade400;
+      case 'nuts':
+        return Colors.brown.shade400;
+      default:
+        return AppColors.primary;
+    }
+  }
+
+  // Helper method to build food icon
+  Widget _buildFoodIcon() {
+    final categoryColor = _getCategoryColor(analytics.food.category);
+    final categoryIcon = _getCategoryIcon(analytics.food.category);
+
+    return Container(
+      width: 200,
+      height: 200,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: categoryColor.withOpacity(0.2),
+        border: Border.all(
+          color: categoryColor.withOpacity(0.5),
+          width: 3,
+        ),
+      ),
+      child: Icon(
+        categoryIcon,
+        color: categoryColor,
+        size: 80,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -22,18 +86,7 @@ class FoodAnalyticsCard extends StatelessWidget {
           Center(
             child: Column(
               children: [
-                Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.surfaceDark,
-                    image: DecorationImage(
-                      image: NetworkImage(analytics.food.imageUrl),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
+                _buildFoodIcon(),
                 const SizedBox(height: 16),
                 Text(
                   analytics.food.name,
@@ -79,7 +132,7 @@ class FoodAnalyticsCard extends StatelessWidget {
                   children: [
                     Text(
                       'Contains',
-                      style: AppTextStyles.titleLarge.copyWith(
+                      style: AppTextStyles.headlineLarge.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -149,7 +202,7 @@ class FoodAnalyticsCard extends StatelessWidget {
                 children: [
                   Text(
                     'Vitamins & Minerals',
-                    style: AppTextStyles.titleLarge.copyWith(
+                    style: AppTextStyles.headlineLarge.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
@@ -221,8 +274,9 @@ class FoodAnalyticsCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
           ],
+
+          const SizedBox(height: 24),
 
           // Health Impact
           Container(
@@ -236,7 +290,7 @@ class FoodAnalyticsCard extends StatelessWidget {
               children: [
                 Text(
                   'Health Impact',
-                  style: AppTextStyles.titleLarge.copyWith(
+                  style: AppTextStyles.headlineLarge.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
@@ -246,7 +300,6 @@ class FoodAnalyticsCard extends StatelessWidget {
                   analytics.healthImpact,
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: Colors.white70,
-                    height: 1.5,
                   ),
                 ),
               ],
@@ -262,7 +315,10 @@ class FoodAnalyticsCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.green.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.green.withOpacity(0.3)),
+                border: Border.all(
+                  color: Colors.green.withOpacity(0.3),
+                  width: 1,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,14 +326,14 @@ class FoodAnalyticsCard extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        Icons.check_circle,
+                        Icons.favorite,
                         color: Colors.green,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         'Benefits',
-                        style: AppTextStyles.titleMedium.copyWith(
+                        style: AppTextStyles.headlineMedium.copyWith(
                           color: Colors.green,
                           fontWeight: FontWeight.bold,
                         ),
@@ -291,14 +347,17 @@ class FoodAnalyticsCard extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('• ',
-                              style: TextStyle(color: Colors.green)),
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               benefit,
-                              style: AppTextStyles.bodySmall.copyWith(
+                              style: AppTextStyles.bodyMedium.copyWith(
                                 color: Colors.white,
-                                height: 1.4,
                               ),
                             ),
                           ),
@@ -319,7 +378,10 @@ class FoodAnalyticsCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.orange.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                border: Border.all(
+                  color: Colors.orange.withOpacity(0.3),
+                  width: 1,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,8 +395,8 @@ class FoodAnalyticsCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Warnings',
-                        style: AppTextStyles.titleMedium.copyWith(
+                        'Considerations',
+                        style: AppTextStyles.headlineMedium.copyWith(
                           color: Colors.orange,
                           fontWeight: FontWeight.bold,
                         ),
@@ -348,14 +410,17 @@ class FoodAnalyticsCard extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('• ',
-                              style: TextStyle(color: Colors.orange)),
+                          Icon(
+                            Icons.info,
+                            color: Colors.orange,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               warning,
-                              style: AppTextStyles.bodySmall.copyWith(
+                              style: AppTextStyles.bodyMedium.copyWith(
                                 color: Colors.white,
-                                height: 1.4,
                               ),
                             ),
                           ),
@@ -366,32 +431,7 @@ class FoodAnalyticsCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
           ],
-
-          // Add to Meal Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                // TODO: Add to meal functionality
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                'Add to Meal',
-                style: AppTextStyles.bodyLarge.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -403,27 +443,14 @@ class FoodAnalyticsCard extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                name,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: Colors.white,
-                ),
-              ),
-            ],
+          Text(
+            name,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.white70,
+            ),
           ),
           Text(
-            value,
+            unit != null ? '$value $unit' : value,
             style: AppTextStyles.bodyMedium.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w600,

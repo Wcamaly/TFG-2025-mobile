@@ -1,82 +1,147 @@
-# Configuración de Google Maps para iOS
+# 🗺️ Configuración de Google Maps
 
-## Problema Actual
-La aplicación se cierra cuando intentas acceder al mapa porque la API key de Google Maps no está configurada correctamente.
+## Problema Identificado
 
-## Solución
+El método `_loadMapSafely()` estaba causando crashes porque:
 
-### 1. Obtener API Key de Google Cloud Console
+1. ❌ **API Key hardcodeada** - No se configuraba dinámicamente
+2. ❌ **Validaciones faltantes** - No verificaba permisos ni configuración
+3. ❌ **Lógica incompleta** - Solo tenía un delay sin validaciones reales
+4. ❌ **Manejo de errores deficiente** - No capturaba excepciones específicas
+5. ❌ **CRÍTICO: Configuración nativa faltante** - iOS y Android necesitan API key en tiempo de compilación
 
-1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
-2. Crea un nuevo proyecto o selecciona uno existente
-3. Habilita las siguientes APIs:
-   - **Maps SDK for iOS**
-   - **Places API** (opcional, para búsquedas)
-   - **Geocoding API** (opcional, para direcciones)
+## Solución Implementada
 
-### 2. Crear API Key
-
-1. Ve a **APIs & Services** > **Credentials**
-2. Haz clic en **+ CREATE CREDENTIALS** > **API Key**
-3. Copia la API key generada
-
-### 3. Configurar la API Key en el Proyecto
-
-#### Opción A: Configuración Directa (Recomendada para desarrollo)
-
-Edita el archivo `lib/core/config/env_config.dart`:
+### 1. **Método `_loadMapSafely()` Mejorado**
 
 ```dart
-static const String googleMapsApiKey = 'TU_API_KEY_AQUI';
+Future<void> _loadMapSafely() async {
+  try {
+    // 1. Validar API Key
+    if (RemoteConfigService.googleMapsApiKey.isEmpty || 
+        RemoteConfigService.googleMapsApiKey == 'YOUR_ACTUAL_API_KEY_HERE') {
+      throw Exception('API Key de Google Maps no configurada');
+    }
+
+    // 2. Verificar permisos de ubicación
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    // 3. Verificar servicios de ubicación
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+    // 4. Validar que el widget siga mounted
+    if (!mounted) {
+      throw Exception('Widget disposed durante la carga');
+    }
+
+    // 5. Registrar estado de configuración
+    print('✅ Mapa configurado correctamente');
+    
+  } catch (e) {
+    print('❌ Error: $e');
+    rethrow; // Para que FutureBuilder capture el error
+  }
+}
 ```
 
-#### Opción B: Configuración en Info.plist (Para producción)
+### 2. **Configuración de API Keys**
 
-Edita el archivo `ios/Runner/Info.plist`:
+#### **Android** (`android/app/src/main/AndroidManifest.xml`)
+```xml
+<meta-data
+    android:name="com.google.android.geo.API_KEY"
+    android:value="${googleMapsApiKey}"/>
+```
 
+#### **iOS** (`ios/Runner/Info.plist`)
 ```xml
 <key>GMSApiKey</key>
-<string>TU_API_KEY_AQUI</string>
+<string>$(GOOGLE_MAPS_API_KEY)</string>
 ```
 
-### 4. Restricciones de Seguridad (Recomendado)
+#### **iOS** (`ios/Runner/AppDelegate.swift`) - **CRÍTICO**
+```swift
+import GoogleMaps
 
-En Google Cloud Console, configura restricciones para tu API key:
+@main
+@objc class AppDelegate: FlutterAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+    // OBLIGATORIO: Configurar API key antes de usar Google Maps
+    GMSServices.provideAPIKey("TU_API_KEY_AQUI")
+    GeneratedPluginRegistrant.register(with: self)
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+}
+```
 
-1. Ve a **APIs & Services** > **Credentials**
-2. Haz clic en tu API key
-3. En **Application restrictions**, selecciona **iOS Apps**
-4. Agrega tu Bundle ID: `com.example.tfg`
-5. En **API restrictions**, selecciona las APIs que necesitas
+### 3. **Configuración en Firebase Remote Config**
 
-### 5. Verificar Configuración
+1. Ve a **Firebase Console** → **Remote Config**
+2. Agrega la clave: `GOOGLE_MAPS_API_KEY`
+3. Valor: Tu API key de Google Maps
+4. Publica los cambios
 
-1. Ejecuta `flutter clean`
-2. Ejecuta `flutter pub get`
-3. Ejecuta `flutter run`
+### 4. **Configuración de Variables de Entorno**
 
-## Archivos a Modificar
+#### **Para Android** (`android/app/build.gradle.kts`)
+```kotlin
+android {
+    defaultConfig {
+        // Otras configuraciones...
+        manifestPlaceholders["googleMapsApiKey"] = 
+            project.findProperty("GOOGLE_MAPS_API_KEY") ?: "YOUR_API_KEY_HERE"
+    }
+}
+```
 
-- `lib/core/config/env_config.dart` - API key principal
-- `ios/Runner/Info.plist` - Configuración iOS (opcional)
+#### **Para iOS** (`ios/Runner.xcodeproj`)
+En Build Settings → User-Defined Settings:
+- Clave: `GOOGLE_MAPS_API_KEY`
+- Valor: Tu API key
 
-## Notas Importantes
+### 5. **Archivo `.env`**
+```env
+GOOGLE_MAPS_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+```
 
-- **Nunca subas tu API key real a Git**
-- Usa variables de entorno en producción
-- Configura restricciones de seguridad en Google Cloud Console
-- La API key debe tener habilitada la API "Maps SDK for iOS"
+## Beneficios de la Solución
 
-## Troubleshooting
+✅ **Validación robusta** - Verifica configuración antes de inicializar  
+✅ **Manejo de errores específicos** - Mensajes claros para cada tipo de error  
+✅ **Permisos verificados** - Solicita permisos de ubicación correctamente  
+✅ **Prevención de crashes** - Validaciones exhaustivas  
+✅ **UI mejorada** - Indicadores de carga y estados de error  
+✅ **Debugging avanzado** - Logs detallados para diagnosticar problemas  
 
-### Error: "This app is not authorized to use this API"
-- Verifica que la API "Maps SDK for iOS" esté habilitada
-- Verifica las restricciones de tu API key
+## Pasos para Obtener Google Maps API Key
 
-### Error: "API key not valid"
-- Verifica que la API key esté correctamente copiada
-- Verifica que no haya espacios extra
+1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
+2. Crea un proyecto o selecciona uno existente
+3. Habilita **Maps SDK for Android** y **Maps SDK for iOS**
+4. Ve a **Credenciales** → **Crear credenciales** → **Clave de API**
+5. Restringe la clave por aplicación (recomendado para producción)
+6. Copia la clave y configúrala según las instrucciones arriba
 
-### App se cierra sin errores
-- Verifica que la API key esté configurada en ambos archivos
-- Ejecuta `flutter clean` y vuelve a compilar 
+## Debugging
+
+Para verificar que funciona correctamente, revisa los logs:
+
+```
+🗺️ Iniciando carga segura del mapa...
+✅ API Key válida: AIzaSyXXXX...
+✅ Permisos de ubicación: granted
+✅ Servicios de ubicación: true
+✅ Entrenadores a mostrar: 5
+✅ Mapa cargado de forma segura
+```
+
+Si ves errores como:
+- `❌ API Key de Google Maps no configurada` → Configurar Remote Config
+- `❌ Permisos de ubicación denegados` → Verificar permisos en dispositivo
+- `❌ Widget disposed` → Problema de ciclo de vida del widget 

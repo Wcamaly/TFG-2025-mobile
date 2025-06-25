@@ -216,7 +216,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: AppTextStyles.titleLarge.copyWith(
+      style: AppTextStyles.headlineMedium.copyWith(
         color: Colors.white,
         fontWeight: FontWeight.bold,
       ),

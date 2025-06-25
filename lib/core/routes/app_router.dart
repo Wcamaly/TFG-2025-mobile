@@ -9,10 +9,14 @@ import '../../features/nutrition/presentation/pages/meal_schedule_page.dart';
 import '../../features/nutrition/presentation/pages/meal_search_page.dart';
 import '../../features/nutrition/presentation/pages/nutrition_goals_page.dart';
 import '../../features/nutrition/presentation/pages/nutrition_page.dart';
+import '../../features/nutrition/presentation/pages/food_analytics_page.dart';
+import '../../features/nutrition/presentation/pages/nutrition_stats_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
+import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/workouts/presentation/pages/workout_detail_page.dart';
 import '../../features/workouts/presentation/pages/workouts_page.dart';
 import '../../features/trainers/presentation/pages/trainer_detail_page.dart';
+import '../../features/trainers/presentation/pages/trainer_search_page.dart';
 import '../../features/trainers/domain/entities/trainer.dart';
 import '../../features/subscriptions/presentation/pages/subscription_page.dart';
 
@@ -20,6 +24,10 @@ class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
+        return MaterialPageRoute(builder: (_) => const OnboardingPage());
+      case '/splash':
+        return MaterialPageRoute(builder: (_) => const SplashPage());
+      case '/onboarding':
         return MaterialPageRoute(builder: (_) => const OnboardingPage());
       case '/login':
         return MaterialPageRoute(builder: (_) => const LoginPage());
@@ -29,6 +37,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const ForgotPasswordPage());
       case '/dashboard':
         return MaterialPageRoute(builder: (_) => const DashboardPage());
+      case '/trainer-search':
+        return MaterialPageRoute(builder: (_) => const TrainerSearchPage());
       case '/workouts':
         return MaterialPageRoute(builder: (_) => const WorkoutsPage());
       case '/workout-detail':
@@ -51,6 +61,10 @@ class AppRouter {
         );
       case '/nutrition':
         return MaterialPageRoute(builder: (_) => const NutritionPage());
+      case '/food-analytics':
+        return MaterialPageRoute(builder: (_) => const FoodAnalyticsPage());
+      case '/nutrition-stats':
+        return MaterialPageRoute(builder: (_) => const NutritionStatsPage());
       case '/meal-detail':
         final mealId = settings.arguments as String;
         return MaterialPageRoute(

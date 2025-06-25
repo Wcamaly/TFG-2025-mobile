@@ -268,7 +268,14 @@ class _TrainerMapViewState extends State<TrainerMapView> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Center(
-        child: CircularProgressIndicator(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Inicializando mapa...'),
+          ],
+        ),
       );
     }
 
@@ -284,16 +291,34 @@ class _TrainerMapViewState extends State<TrainerMapView> {
     return FutureBuilder<void>(
       future: _loadMapSafely(),
       builder: (context, snapshot) {
+        if (kDebugMode) {
+          print('🗺️ ConnectionState: ${snapshot.connectionState}');
+        }
+
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Verificando configuración del mapa...'),
+              ],
+            ),
           );
         }
 
         if (snapshot.hasError) {
           if (kDebugMode) {
             print('❌ Error en FutureBuilder: ${snapshot.error}');
+            print('❌ Stack trace completo: ${snapshot.stackTrace}');
           }
+
+          // Mostrar error específico si es por API Key
+          if (snapshot.error.toString().contains('API Key')) {
+            return _buildApiKeyErrorWidget();
+          }
+
           return _buildMapFallback();
         }
 
@@ -308,11 +333,78 @@ class _TrainerMapViewState extends State<TrainerMapView> {
   }
 
   Future<void> _loadMapSafely() async {
-    // Simular una carga asíncrona para dar tiempo al sistema
-    await Future.delayed(const Duration(milliseconds: 100));
+    try {
+      if (kDebugMode) {
+        print('🗺️ Iniciando carga segura del mapa...');
+      }
 
-    if (kDebugMode) {
-      print('🗺️ Cargando mapa de forma segura...');
+      // 1. Validar que Google Maps API Key esté configurada
+      if (RemoteConfigService.googleMapsApiKey.isEmpty ||
+          RemoteConfigService.googleMapsApiKey == 'YOUR_ACTUAL_API_KEY_HERE' ||
+          RemoteConfigService.googleMapsApiKey ==
+              'YOUR_GOOGLE_MAPS_API_KEY_HERE') {
+        throw Exception('API Key de Google Maps no configurada correctamente');
+      }
+
+      // 2. Verificar permisos de ubicación
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (kDebugMode) {
+            print('⚠️ Permisos de ubicación denegados');
+          }
+          // Continuar sin ubicación actual
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (kDebugMode) {
+          print('⚠️ Permisos de ubicación denegados permanentemente');
+        }
+        // Continuar sin ubicación actual
+      }
+
+      // 3. Verificar que el servicio de ubicación esté habilitado
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (kDebugMode) {
+          print('⚠️ Servicios de ubicación deshabilitados');
+        }
+        // Continuar sin ubicación actual
+      }
+
+      // 4. Simular tiempo de carga para evitar race conditions
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      // 5. Validar que el widget siga mounted
+      if (!mounted) {
+        throw Exception('Widget disposed durante la carga');
+      }
+
+      // 6. Verificar que tenemos entrenadores para mostrar
+      if (widget.trainers.isEmpty) {
+        if (kDebugMode) {
+          print('⚠️ No hay entrenadores para mostrar en el mapa');
+        }
+      }
+
+      if (kDebugMode) {
+        print('✅ Mapa cargado de forma segura');
+        print(
+            '✅ API Key válida: ${RemoteConfigService.googleMapsApiKey.substring(0, 10)}...');
+        print('✅ Permisos de ubicación: $permission');
+        print('✅ Servicios de ubicación: $serviceEnabled');
+        print('✅ Entrenadores a mostrar: ${widget.trainers.length}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error en carga segura del mapa: $e');
+        print('❌ Stack trace: ${StackTrace.current}');
+      }
+
+      // Re-lanzar la excepción para que el FutureBuilder la capture
+      rethrow;
     }
   }
 
@@ -320,28 +412,68 @@ class _TrainerMapViewState extends State<TrainerMapView> {
     try {
       if (kDebugMode) {
         print('🗺️ Creando widget GoogleMap...');
+        print('🗺️ Markers disponibles: ${_markers.length}');
+        print(
+            '🗺️ Posición inicial: ${_initialPosition.target.latitude}, ${_initialPosition.target.longitude}');
       }
 
-      return GoogleMap(
-        onMapCreated: (GoogleMapController controller) {
-          if (kDebugMode) {
-            print('🗺️ Controlador del mapa creado exitosamente');
-          }
-          _mapController = controller;
-        },
-        initialCameraPosition: _initialPosition,
-        markers: _markers.isNotEmpty ? _markers : {},
-        myLocationEnabled: false,
-        myLocationButtonEnabled: false,
-        zoomControlsEnabled: false,
-        mapToolbarEnabled: false,
-        onCameraMove: (CameraPosition position) {
-          // Log opcional para verificar que el mapa responde
-          if (kDebugMode) {
-            print(
-                '🗺️ Cámara movida a: ${position.target.latitude}, ${position.target.longitude}');
-          }
-        },
+      // Validación adicional antes de crear el widget
+      if (!mounted) {
+        if (kDebugMode) {
+          print('❌ Widget no está mounted, cancelando creación del mapa');
+        }
+        return _buildMapFallback();
+      }
+
+      return Container(
+        child: GoogleMap(
+          key: const Key('google_map_widget'),
+          onMapCreated: (GoogleMapController controller) {
+            try {
+              if (kDebugMode) {
+                print('🗺️ ¡Mapa creado exitosamente!');
+              }
+              if (mounted) {
+                setState(() {
+                  _mapController = controller;
+                });
+
+                // Mover a la ubicación actual si está disponible
+                if (_currentPosition != null) {
+                  controller.animateCamera(
+                    CameraUpdate.newLatLng(
+                      LatLng(_currentPosition!.latitude,
+                          _currentPosition!.longitude),
+                    ),
+                  );
+                }
+              }
+            } catch (e) {
+              if (kDebugMode) {
+                print('❌ Error al configurar controlador: $e');
+              }
+            }
+          },
+          initialCameraPosition: _initialPosition,
+          markers: _markers.isNotEmpty ? _markers : <Marker>{},
+          myLocationEnabled: false,
+          myLocationButtonEnabled: false,
+          zoomControlsEnabled: true,
+          mapToolbarEnabled: false,
+          compassEnabled: true,
+          rotateGesturesEnabled: true,
+          scrollGesturesEnabled: true,
+          tiltGesturesEnabled: true,
+          zoomGesturesEnabled: true,
+          mapType: MapType.normal,
+          onCameraMove: (CameraPosition position) {
+            // Log opcional para verificar que el mapa responde
+            if (kDebugMode && mounted) {
+              print(
+                  '🗺️ Cámara movida a: ${position.target.latitude}, ${position.target.longitude}');
+            }
+          },
+        ),
       );
     } catch (e) {
       if (kDebugMode) {
@@ -394,6 +526,76 @@ class _TrainerMapViewState extends State<TrainerMapView> {
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.onPrimary,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildApiKeyErrorWidget() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.key_off,
+            size: 64,
+            color: AppColors.error,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Configuración requerida',
+            style: AppTextStyles.headlineMedium.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Google Maps API Key no está configurada.\n\nPor favor:\n1. Ve a Firebase Console\n2. Configura Remote Config\n3. Agrega GOOGLE_MAPS_API_KEY',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _isLoading = true;
+                      _errorMessage = null;
+                    });
+                    _initializeMap();
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Reintentar'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.onPrimary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // Mostrar vista de fallback directamente
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.list),
+                  label: const Text('Ver Lista'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.surface,
+                    foregroundColor: AppColors.textPrimary,
+                    side: BorderSide(color: AppColors.primary),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

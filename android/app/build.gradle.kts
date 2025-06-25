@@ -53,7 +53,8 @@ android {
         versionName = flutter.versionName
 
         // Pass environment variables to AndroidManifest.xml
-        manifestPlaceholders["googleMapsApiKey"] = getEnvVar("GOOGLE_MAPS_API_KEY", "YOUR_GOOGLE_MAPS_API_KEY_HERE")
+        // TEMPORAL: Usando API key hardcodeada - reemplaza con tu API key real
+        manifestPlaceholders["googleMapsApiKey"] = getEnvVar("GOOGLE_MAPS_API_KEY", "AIzaSyBKDOjEk3pHQDUGhPMRdD46oLKGK6xHAXM")
     }
 
     buildTypes {

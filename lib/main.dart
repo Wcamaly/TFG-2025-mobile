@@ -8,6 +8,7 @@ import 'core/providers/locale_provider.dart';
 import 'core/di/injection_container.dart';
 import 'core/config/env_config.dart';
 import 'core/config/remote_config_service.dart';
+import 'core/routes/app_router.dart';
 import 'features/splash/presentation/pages/splash_page.dart';
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/authentication/presentation/pages/login_page.dart';
@@ -67,34 +68,7 @@ class MyApp extends ConsumerWidget {
           return const AppInitializer();
         },
       ),
-      routes: {
-        '/splash': (context) => const SplashPage(),
-        '/onboarding': (context) => const OnboardingPage(),
-        '/login': (context) => const LoginPage(),
-        '/register': (context) => const RegisterPage(),
-        '/forgot-password': (context) => const ForgotPasswordPage(),
-        '/dashboard': (context) => const DashboardPage(),
-        '/trainer-search': (context) => const TrainerSearchPage(),
-      },
-      onGenerateRoute: (settings) {
-        switch (settings.name) {
-          case '/trainer-detail':
-            final trainer = settings.arguments as Trainer;
-            return MaterialPageRoute(
-              builder: (context) => TrainerDetailPage(trainer: trainer),
-            );
-          case '/subscription':
-            final args = settings.arguments as Map<String, dynamic>;
-            return MaterialPageRoute(
-              builder: (context) => SubscriptionPage(
-                trainer: args['trainer'] as Trainer,
-                package: args['package'] as TrainerPackage,
-              ),
-            );
-          default:
-            return null;
-        }
-      },
+      onGenerateRoute: AppRouter.generateRoute,
     );
   }
 }
