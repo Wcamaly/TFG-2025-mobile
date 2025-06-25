@@ -1,22 +1,26 @@
-import '../../domain/entities/user.dart';
+import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<User> signIn({
+  Future<UserModel> signInWithEmailAndPassword({
     required String email,
     required String password,
   });
 
-  Future<User> signUp({
+  Future<UserModel> signUpWithEmailAndPassword({
     required String email,
     required String password,
     required String name,
   });
 
+  Future<UserModel> signInWithGoogle();
+
   Future<void> signOut();
 
-  Future<User?> getCurrentUser();
+  Future<void> resetPassword(String email);
 
-  Future<void> resetPassword({required String email});
+  Future<UserModel?> getCurrentUser();
+
+  Stream<UserModel?> get authStateChanges;
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -24,7 +28,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   // Por ejemplo, Firebase Auth, un servicio REST, etc.
 
   @override
-  Future<User> signIn({
+  Future<UserModel> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
@@ -33,11 +37,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<User> signUp({
+  Future<UserModel> signUpWithEmailAndPassword({
     required String email,
     required String password,
     required String name,
   }) async {
+    // Implementación real aquí
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<UserModel> signInWithGoogle() async {
     // Implementación real aquí
     throw UnimplementedError();
   }
@@ -49,15 +59,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<User?> getCurrentUser() async {
+  Future<void> resetPassword(String email) async {
+    // Implementación real aquí
+    // Aquí enviarías el correo de recuperación de contraseña
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<UserModel?> getCurrentUser() async {
     // Implementación real aquí
     throw UnimplementedError();
   }
 
   @override
-  Future<void> resetPassword({required String email}) async {
-    // Implementación real aquí
-    // Aquí enviarías el correo de recuperación de contraseña
-    throw UnimplementedError();
-  }
+  Stream<UserModel?> get authStateChanges => throw UnimplementedError();
 }

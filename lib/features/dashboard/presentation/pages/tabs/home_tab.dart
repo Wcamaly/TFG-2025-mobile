@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../providers/dashboard_provider.dart';
-import '../../../widgets/stats_card.dart';
-import '../../../widgets/workout_card.dart';
-import '../../../widgets/nutrition_card.dart';
+import 'package:tfg_2025_mobile/features/dashboard/presentation/providers/dashboard_provider.dart';
+import 'package:tfg_2025_mobile/features/dashboard/presentation/widgets/nutrition_card.dart';
+import 'package:tfg_2025_mobile/features/dashboard/presentation/widgets/stats_card.dart';
+import 'package:tfg_2025_mobile/features/dashboard/presentation/widgets/workout_card.dart';
 
 class HomeTab extends ConsumerWidget {
   const HomeTab({super.key});
@@ -46,23 +46,88 @@ class HomeTab extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Workouts',
+                            'Your Workouts',
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/workouts');
-                            },
-                            child: const Text('See All'),
-                          ),
+                          // Solo mostrar "See All" si hay workouts
+                          // TextButton(
+                          //   onPressed: () {
+                          //     Navigator.pushNamed(context, '/workouts');
+                          //   },
+                          //   child: const Text('See All'),
+                          // ),
                         ],
                       ),
                       const SizedBox(height: 16),
-                      const WorkoutCard(
-                        title: 'Full Body Workout',
-                        duration: '45 min',
-                        difficulty: 'Intermediate',
-                        imageUrl: 'https://example.com/workout.jpg',
+
+                      // Empty state - no workouts
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color:
+                                Theme.of(context).dividerColor.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.fitness_center_outlined,
+                              size: 64,
+                              color: Theme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.6),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No Workouts Yet',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Find a personal trainer to start your fitness journey',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.color,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 20),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                      context, '/trainer-search');
+                                },
+                                icon: const Icon(Icons.search),
+                                label: const Text('Find a Trainer'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Theme.of(context).primaryColor,
+                                  foregroundColor: Colors.white,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 24),
                       Row(

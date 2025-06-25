@@ -1,14 +1,37 @@
 plugins {
     id("com.android.application")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
+    // END: FlutterFire Configuration
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+import java.util.Properties
+
+// Load environment variables from .env file
+val envFile = rootProject.file("../.env")
+val envProperties = Properties()
+
+if (envFile.exists()) {
+    envFile.inputStream().use { stream ->
+        envProperties.load(stream)
+    }
+}
+
+// Function to get environment variable with fallback
+fun getEnvVar(name: String, fallback: String = ""): String {
+    return envProperties.getProperty(name) 
+        ?: System.getenv(name) 
+        ?: fallback
+}
+
 android {
     namespace = "com.example.tfg"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -28,6 +51,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Pass environment variables to AndroidManifest.xml
+        manifestPlaceholders["googleMapsApiKey"] = getEnvVar("GOOGLE_MAPS_API_KEY", "YOUR_GOOGLE_MAPS_API_KEY_HERE")
     }
 
     buildTypes {

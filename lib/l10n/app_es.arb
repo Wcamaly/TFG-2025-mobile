@@ -1,0 +1,70 @@
+{
+    "appName": "Gymnestic",
+    "welcomeBack": "Bienvenido de nuevo",
+    "todaysStats": "Estadísticas de Hoy",
+    "caloriesBurned": "Calorías Quemadas",
+    "steps": "Pasos",
+    "yourWorkouts": "Tus Entrenamientos",
+    "nutrition": "Nutrición",
+    "seeAll": "Ver Todo",
+    "editProfile": "Editar Perfil",
+    "settings": "Configuración",
+    "signOut": "Cerrar Sesión",
+    "dailyCalories": "Calorías Diarias",
+    "remaining": "Restante: {count} kcal",
+    "@@locale": "es",
+    
+    "onboardingBuildMindTitle": "Construye tu Mente\ny Cuerpo",
+    "@onboardingBuildMindTitle": {
+        "description": "Título de la primera página del onboarding"
+    },
+    
+    "onboardingGetStrongerTitle": "Prepárate para ser\nmás Fuerte",
+    "@onboardingGetStrongerTitle": {
+        "description": "Título de la segunda página del onboarding"
+    },
+    
+    "onboardingRunningDreamTitle": "Corre hacia tu\nSueño",
+    "@onboardingRunningDreamTitle": {
+        "description": "Título de la tercera página del onboarding"
+    },
+    
+    "onboardingInspiration": "Sé una Inspiración",
+    "@onboardingInspiration": {
+        "description": "Subtítulo común en las páginas de onboarding"
+    },
+    
+    "onboardingNext": "Siguiente",
+    "@onboardingNext": {
+        "description": "Texto del botón para avanzar en el onboarding"
+    },
+    
+    "onboardingGetStarted": "Comenzar",
+    "@onboardingGetStarted": {
+        "description": "Texto del botón final del onboarding"
+    },
+    
+    "onboardingSkip": "Saltar",
+    "@onboardingSkip": {
+        "description": "Texto del botón saltar en onboarding"
+    },
+    
+    "buildYourBody": "Construye tu Cuerpo",
+    "buildingProgress": "Progreso de Construcción",
+    "dailyGoals": "Objetivos Diarios",
+    "bicepsTricepsTraining": "Entrenamiento de Bíceps y Tríceps",
+    "totalActivity": "Actividad Total",
+    "caloriesBurnedKKal": "Calorías Quemadas",
+    "percent": "Porciento",
+    "monitoring": "Monitoreo",
+    "dailyProgress": "Progreso Diario",
+    "warmWelcome": "Una Cálida Bienvenida",
+    "strengthEssentials": "Fundamentos de Fuerza: Tu Primera Rutina",
+    "scoopOfJoy": "Cucharada de Alegría",
+    "pushUpChallenge": "Desafío de 50 Flexiones",
+    "milkBeforeNap": "Leche Antes de la Siesta",
+    "workoutOfTheDay": "Entrenamiento del Día",
+    "searchWorkouts": "Buscar Entrenamientos",
+    "workoutHistory": "Historial de Entrenamientos",
+    "myStats": "Mis Estadísticas"
+} 

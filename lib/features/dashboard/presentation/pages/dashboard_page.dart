@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../providers/dashboard_provider.dart';
-import '../widgets/stats_card.dart';
+import '../widgets/stats_card_simple.dart';
 import '../widgets/workout_card.dart';
-import '../widgets/nutrition_card.dart';
+import '../widgets/nutrition_card_simple.dart';
 import '../../../authentication/presentation/providers/auth_provider.dart';
+import '../../../trainers/presentation/pages/trainer_search_page.dart';
 import '../../../workouts/presentation/pages/workouts_page.dart';
-import 'tabs/home_tab.dart';
-import 'tabs/nutrition_tab.dart';
-import 'tabs/profile_tab.dart';
+import '../../../profile/presentation/pages/profile_page.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -21,12 +22,16 @@ class DashboardPage extends ConsumerStatefulWidget {
 class _DashboardPageState extends ConsumerState<DashboardPage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    const HomeTab(),
-    const WorkoutsPage(),
-    const NutritionTab(),
-    const ProfileTab(),
-  ];
+  List<Widget> get _pages => [
+        HomeTab(onNavigateToTrainers: () {
+          setState(() {
+            _currentIndex = 1;
+          });
+        }),
+        const TrainerSearchPage(),
+        const WorkoutsPage(),
+        const NutritionTab(),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -43,12 +48,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         type: BottomNavigationBarType.fixed,
         backgroundColor: AppColors.surface,
         selectedItemColor: AppColors.primary,
-        unselectedItemColor: Colors.grey[600],
+        unselectedItemColor: AppColors.textSecondary,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
             label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search_outlined),
+            activeIcon: Icon(Icons.search),
+            label: 'Trainers',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.fitness_center_outlined),
@@ -60,11 +70,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             activeIcon: Icon(Icons.restaurant_menu),
             label: 'Nutrition',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
         ],
       ),
     );
@@ -72,11 +77,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 }
 
 class HomeTab extends ConsumerWidget {
-  const HomeTab({super.key});
+  final VoidCallback onNavigateToTrainers;
+
+  const HomeTab({
+    super.key,
+    required this.onNavigateToTrainers,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(dashboardProvider);
+    ref.watch(dashboardProvider);
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -91,44 +101,57 @@ class HomeTab extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Welcome back,',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.grey[600],
-                          ),
+                      AppLocalizations.of(context)!.welcomeBack,
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'John Doe',
-                      style: Theme.of(context).textTheme.displayMedium,
+                      style: AppTextStyles.displayMedium,
                     ),
                   ],
                 ),
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: Colors.grey[300],
-                  child: const Icon(Icons.person),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfilePage(),
+                      ),
+                    );
+                  },
+                  child: const CircleAvatar(
+                    radius: 24,
+                    backgroundColor: AppColors.surfaceLight,
+                    child: Icon(
+                      Icons.person,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 24),
             Text(
-              'Today\'s Stats',
-              style: Theme.of(context).textTheme.titleLarge,
+              AppLocalizations.of(context)!.todaysStats,
+              style: AppTextStyles.headlineLarge,
             ),
             const SizedBox(height: 16),
-            Row(
+            const Row(
               children: [
                 Expanded(
-                  child: StatsCard(
+                  child: StatsCardSimple(
                     icon: Icons.local_fire_department,
                     value: '350',
                     unit: 'kcal',
                     label: 'Calories Burned',
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16),
                 Expanded(
-                  child: StatsCard(
+                  child: StatsCardSimple(
                     icon: Icons.directions_run,
                     value: '5,230',
                     unit: 'steps',
@@ -141,36 +164,40 @@ class HomeTab extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'Your Workouts',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: AppTextStyles.headlineLarge,
                 ),
                 TextButton(
-                  onPressed: () {
-                    // Navegar a la lista completa de entrenamientos
-                  },
-                  child: const Text('See All'),
+                  onPressed: onNavigateToTrainers,
+                  child: const Text('Find More'),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             SizedBox(
-              height: 180,
+              height: 160,
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                children: const [
-                  WorkoutCard(
-                    title: 'Full Body Workout',
-                    duration: '45 min',
-                    difficulty: 'Intermediate',
-                    imageUrl: 'assets/images/workout1.jpg',
+                children: [
+                  Container(
+                    width: 280,
+                    child: const WorkoutCard(
+                      title: 'Full Body Workout',
+                      duration: '45 min',
+                      difficulty: 'Intermediate',
+                      imageUrl: '',
+                    ),
                   ),
-                  SizedBox(width: 16),
-                  WorkoutCard(
-                    title: 'HIIT Training',
-                    duration: '30 min',
-                    difficulty: 'Advanced',
-                    imageUrl: 'assets/images/workout2.jpg',
+                  const SizedBox(width: 16),
+                  Container(
+                    width: 280,
+                    child: const WorkoutCard(
+                      title: 'HIIT Training',
+                      duration: '30 min',
+                      difficulty: 'Advanced',
+                      imageUrl: '',
+                    ),
                   ),
                 ],
               ),
@@ -179,9 +206,9 @@ class HomeTab extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'Nutrition',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: AppTextStyles.headlineLarge,
                 ),
                 TextButton(
                   onPressed: () {
@@ -192,7 +219,7 @@ class HomeTab extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-            const NutritionCard(
+            const NutritionCardSimple(
               calories: 1800,
               protein: 120,
               carbs: 200,
@@ -205,127 +232,63 @@ class HomeTab extends ConsumerWidget {
   }
 }
 
-class WorkoutsTab extends StatelessWidget {
-  const WorkoutsTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Workouts Tab'));
-  }
-}
-
 class NutritionTab extends StatelessWidget {
   const NutritionTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Nutrition Tab'));
-  }
-}
-
-class ProfileTab extends ConsumerWidget {
-  const ProfileTab({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.grey,
-              child: Icon(
-                Icons.person,
-                size: 50,
-                color: Colors.white,
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Nutrition',
+                style: AppTextStyles.displayMedium.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'John Doe',
-              style: Theme.of(context).textTheme.displayMedium,
-            ),
-            Text(
-              'john.doe@example.com',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-            ),
-            const SizedBox(height: 32),
-            _ProfileMenuItem(
-              icon: Icons.person_outline,
-              title: 'Edit Profile',
-              onTap: () {
-                // Navegar a la pantalla de editar perfil
-              },
-            ),
-            _ProfileMenuItem(
-              icon: Icons.notifications_outlined,
-              title: 'Notifications',
-              onTap: () {
-                // Navegar a la pantalla de notificaciones
-              },
-            ),
-            _ProfileMenuItem(
-              icon: Icons.settings_outlined,
-              title: 'Settings',
-              onTap: () {
-                // Navegar a la pantalla de configuración
-              },
-            ),
-            _ProfileMenuItem(
-              icon: Icons.help_outline,
-              title: 'Help & Support',
-              onTap: () {
-                // Navegar a la pantalla de ayuda
-              },
-            ),
-            _ProfileMenuItem(
-              icon: Icons.privacy_tip_outlined,
-              title: 'Privacy Policy',
-              onTap: () {
-                // Navegar a la política de privacidad
-              },
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () {
-                ref.read(authProvider.notifier).signOut(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                minimumSize: const Size(double.infinity, 50),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.restaurant_menu_outlined,
+                      size: 80,
+                      color: AppColors.primary.withOpacity(0.6),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Nutrition Coming Soon',
+                      style: AppTextStyles.headlineMedium.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Track your meals and nutrition goals',
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
-              child: const Text('Sign Out'),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    );
-  }
-}
-
-class _ProfileMenuItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-
-  const _ProfileMenuItem({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
     );
   }
 }

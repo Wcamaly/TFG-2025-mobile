@@ -52,13 +52,18 @@ class NutritionNotifier extends StateNotifier<NutritionState> {
   }
 
   void filterByCategory(String? category) {
-    if (state is! _Loaded) return;
-    final currentState = state as _Loaded;
-    state = NutritionState.loaded(
-      mealPlan: currentState.mealPlan,
-      goals: currentState.goals,
-      categories: currentState.categories,
-      selectedCategory: category == 'All' ? null : category,
+    state.when(
+      initial: () {},
+      loading: () {},
+      error: (_) {},
+      loaded: (mealPlan, goals, categories, selectedCategory) {
+        state = NutritionState.loaded(
+          mealPlan: mealPlan,
+          goals: goals,
+          categories: categories,
+          selectedCategory: category == 'All' ? null : category,
+        );
+      },
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../authentication/presentation/providers/auth_provider.dart';
+import 'package:tfg_2025_mobile/features/authentication/presentation/providers/auth_provider.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -78,7 +78,7 @@ class ProfileTab extends ConsumerWidget {
             icon: Icons.logout,
             title: 'Logout',
             onTap: () {
-              ref.read(authProvider.notifier).signOut();
+              ref.read(authProvider.notifier).signOut(context);
               Navigator.pushNamedAndRemoveUntil(
                 context,
                 '/login',

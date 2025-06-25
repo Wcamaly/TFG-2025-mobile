@@ -8,6 +8,8 @@ class UserStats with _$UserStats {
     required int calories,
     required int heartRate,
     required double weight,
+    required int workoutMinutes,
+    required int workoutsCompleted,
     required List<DailyProgress> weeklyProgress,
   }) = _UserStats;
 }

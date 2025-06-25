@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../providers/meal_schedule_provider.dart';
-import '../widgets/meal_schedule_item.dart';
-import '../../domain/entities/meal.dart';
+import 'package:tfg_2025_mobile/features/nutrition/presentation/providers/meal_schedule_provider.dart';
+import 'package:tfg_2025_mobile/features/nutrition/presentation/widgets/meal_schedule_item.dart';
+import 'package:tfg_2025_mobile/features/nutrition/domain/entities/meal.dart';
 
 class MealSchedulePage extends ConsumerStatefulWidget {
   const MealSchedulePage({super.key});
@@ -61,7 +61,6 @@ class _MealSchedulePageState extends ConsumerState<MealSchedulePage> {
               todayDecoration: BoxDecoration(
                 color: Colors.blue,
                 shape: BoxShape.circle,
-                opacity: 0.5,
               ),
             ),
           ),
@@ -71,7 +70,7 @@ class _MealSchedulePageState extends ConsumerState<MealSchedulePage> {
               loading: () => const Center(
                 child: CircularProgressIndicator(),
               ),
-              error: (message) => Center(
+              error: (error, stackTrace) => Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -82,7 +81,7 @@ class _MealSchedulePageState extends ConsumerState<MealSchedulePage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      message,
+                      error.toString(),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: Colors.red,
                           ),
@@ -100,7 +99,7 @@ class _MealSchedulePageState extends ConsumerState<MealSchedulePage> {
                   ],
                 ),
               ),
-              loaded: (mealPlan) => ReorderableListView.builder(
+              data: (mealPlan) => ReorderableListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: mealPlan.meals.length,
                 itemBuilder: (context, index) {

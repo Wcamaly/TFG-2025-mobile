@@ -8,5 +8,6 @@ class OnboardingState with _$OnboardingState {
   const factory OnboardingState.initial() = _Initial;
   const factory OnboardingState.loading() = _Loading;
   const factory OnboardingState.loaded(List<OnboardingSlide> slides) = _Loaded;
+  const factory OnboardingState.completed() = _Completed;
   const factory OnboardingState.error(String message) = _Error;
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/user_stats.dart';
+import 'package:tfg_2025_mobile/features/dashboard/domain/entities/user_stats.dart';
 
 class StatsCard extends StatelessWidget {
   final UserStats stats;
@@ -30,7 +30,7 @@ class StatsCard extends StatelessWidget {
         children: [
           _StatItem(
             icon: Icons.local_fire_department_outlined,
-            value: stats.caloriesBurned.toString(),
+            value: stats.calories.toString(),
             unit: 'kcal',
             label: 'Burned',
           ),

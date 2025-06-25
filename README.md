@@ -1,164 +1,209 @@
-# TFG-2025-Mobile
+# Gymnestic - App de Fitness
 
-Aplicación móvil desarrollada en Flutter para el Trabajo de Fin de Grado 2025.
+Una aplicación móvil moderna para fitness y entrenamiento personal, construida con Flutter y siguiendo principios de Clean Architecture.
 
-## Requisitos Previos
+## 🚀 Características
 
-Antes de comenzar, asegúrate de tener instalado:
+- **Autenticación completa** con email/password y Google Sign-In
+- **Dashboard personalizado** con estadísticas de entrenamiento
+- **Mapa de entrenadores** con Google Maps
+- **Seguimiento nutricional** con planes de comidas
+- **Sistema de entrenamientos** con ejercicios detallados
+- **Tema oscuro** moderno y elegante
+- **Internacionalización** (Español/Inglés)
+- **Firebase Integration** con Remote Config y Crashlytics
 
-- [Flutter SDK](https://flutter.dev/docs/get-started/install) (última versión estable)
-- [Android Studio](https://developer.android.com/studio) (para desarrollo Android)
-- [Xcode](https://developer.apple.com/xcode/) (para desarrollo iOS, solo en macOS)
-- [VS Code](https://code.visualstudio.com/) (opcional, pero recomendado)
+## 📱 Capturas de Pantalla
 
-## Configuración del Entorno
+[Capturas de pantalla aquí]
 
-1. Clona el repositorio:
+## 🛠️ Tecnologías
+
+- **Flutter** 3.16+
+- **Dart** 3.2+
+- **Firebase** (Remote Config, Crashlytics, Analytics)
+- **Google Maps** para iOS y Android
+- **Riverpod** para gestión de estado
+- **Clean Architecture** con Domain-Driven Design
+
+## 📋 Requisitos
+
+- Flutter 3.16.0 o superior
+- Dart 3.2.0 o superior
+- iOS 14.0+ / Android API 21+
+- Cuenta de Google Cloud para Maps API
+- Proyecto Firebase configurado
+
+## 🔧 Instalación
+
+### 1. Clonar el repositorio
+
 ```bash
-git clone https://github.com/tu-usuario/TFG-2025-mobile.git
-cd TFG-2025-mobile
+git clone https://github.com/tu-usuario/tfg-2025-mobile.git
+cd tfg-2025-mobile
 ```
 
-2. Instala las dependencias:
+### 2. Instalar dependencias
+
 ```bash
 flutter pub get
 ```
 
-## Ejecutar la Aplicación
+### 3. Configurar Firebase
 
-### Android
+1. Crea un proyecto en [Firebase Console](https://console.firebase.google.com/)
+2. Descarga los archivos de configuración:
+   - `google-services.json` para Android
+   - `GoogleService-Info.plist` para iOS
+3. Colócalos en las carpetas correspondientes
 
-#### Usando Emulador
-1. Abre Android Studio
-2. Inicia un emulador Android desde AVD Manager
-3. Ejecuta la aplicación:
+### 4. Configurar Google Maps
+
+#### Opción A: Script Automático (Recomendado)
+
+```bash
+# Instalar Firebase CLI
+npm install -g firebase-tools
+
+# Ejecutar script de configuración
+node scripts/setup_remote_config.js
+```
+
+#### Opción B: Configuración Manual
+
+1. Obtén una API key de [Google Cloud Console](https://console.cloud.google.com/)
+2. Habilita **Maps SDK for iOS** y **Maps SDK for Android**
+3. Ve a [Firebase Console](https://console.firebase.google.com/) > **Remote Config**
+4. Agrega el parámetro `google_maps_api_key` con tu API key
+
+### 5. Ejecutar la aplicación
+
 ```bash
 flutter run
 ```
 
-#### En Dispositivo Físico
-1. Activa el modo desarrollador en tu dispositivo Android
-2. Conecta tu dispositivo vía USB
-3. Ejecuta:
-```bash
-flutter run
-```
-
-#### Generar APK
-Para generar un archivo APK instalable:
-```bash
-flutter build apk
-```
-El APK se generará en `build/app/outputs/flutter-apk/app-release.apk`
-
-### iOS
-
-#### Usando Simulador
-1. Abre un simulador iOS:
-```bash
-open -a Simulator
-```
-2. Ejecuta la aplicación:
-```bash
-flutter run
-```
-
-#### En Dispositivo Físico
-1. Abre el proyecto en Xcode:
-```bash
-open ios/Runner.xcworkspace
-```
-2. Configura tu equipo de desarrollo en Xcode
-3. Conecta tu dispositivo iOS
-4. Selecciona tu dispositivo en Xcode y ejecuta la aplicación
-
-## Estructura del Proyecto
-
-La aplicación sigue una arquitectura feature-first combinada con los principios de Clean Architecture:
+## 🗂️ Estructura del Proyecto
 
 ```
 lib/
-├── features/           # Características principales de la aplicación
-│   ├── authentication/ # Feature de autenticación
-│   │   ├── data/      # Implementación de repositorios y fuentes de datos
-│   │   ├── domain/    # Entidades, casos de uso e interfaces de repositorios
-│   │   └── presentation/ # UI y lógica de presentación (providers, widgets)
-│   │
-│   ├── dashboard/     # Feature del dashboard principal
-│   ├── nutrition/     # Feature de nutrición
-│   ├── onboarding/    # Feature de onboarding
-│   ├── trainer/       # Feature de entrenador
-│   └── workouts/      # Feature de entrenamientos
-│
-├── core/              # Funcionalidades centrales y configuración
-│   ├── routes/        # Configuración de navegación
-│   ├── theme/         # Temas y estilos de la aplicación
-│   ├── error/         # Manejo de errores
-│   └── di/           # Configuración de inyección de dependencias
-│
-└── main.dart         # Punto de entrada de la aplicación
-
-test/                 # Tests
-├── features/         # Tests organizados por features
-└── core/            # Tests de funcionalidades core
-
-assets/              # Recursos estáticos
-├── images/         # Imágenes
-├── fonts/          # Fuentes
-└── icons/          # Iconos
+├── core/                    # Código compartido
+│   ├── config/             # Configuraciones
+│   ├── di/                 # Inyección de dependencias
+│   ├── error/              # Manejo de errores
+│   ├── network/            # Servicios de red
+│   ├── providers/          # Providers globales
+│   ├── routes/             # Configuración de rutas
+│   ├── services/           # Servicios compartidos
+│   ├── theme/              # Temas y estilos
+│   └── widgets/            # Widgets reutilizables
+├── features/               # Características de la app
+│   ├── authentication/     # Autenticación
+│   ├── dashboard/          # Dashboard principal
+│   ├── nutrition/          # Nutrición
+│   ├── onboarding/         # Onboarding
+│   ├── profile/            # Perfil de usuario
+│   ├── splash/             # Pantalla de carga
+│   ├── subscriptions/      # Suscripciones
+│   ├── trainer/            # Entrenadores
+│   ├── trainers/           # Búsqueda de entrenadores
+│   └── workouts/           # Entrenamientos
+└── main.dart               # Punto de entrada
 ```
 
-### Arquitectura por Features
+## 🏗️ Arquitectura
 
-Cada feature sigue la arquitectura limpia con tres capas principales:
+El proyecto sigue **Clean Architecture** con **Domain-Driven Design**:
 
-#### 1. Presentation
-- Widgets de UI
-- Providers de estado (usando Riverpod)
-- Controllers de la lógica de presentación
+- **Domain Layer**: Entidades, casos de uso y repositorios
+- **Data Layer**: Implementaciones de repositorios y fuentes de datos
+- **Presentation Layer**: UI, providers y widgets
 
-#### 2. Domain
-- Entidades de negocio
-- Casos de uso
-- Interfaces de repositorios
+### Patrones Utilizados
 
-#### 3. Data
-- Implementaciones de repositorios
-- Modelos de datos
-- Fuentes de datos (API, local storage)
+- **Repository Pattern**: Para acceso a datos
+- **Use Case Pattern**: Para lógica de negocio
+- **Provider Pattern**: Para gestión de estado
+- **Dependency Injection**: Para inyección de dependencias
 
-### Core
+## 🔑 Configuración de APIs
 
-El directorio `core` contiene funcionalidades compartidas:
-- Configuración de rutas con GoRouter
-- Temas y estilos globales
-- Manejo centralizado de errores
-- Configuración de dependencias
+### Google Maps
 
-### Convenciones de Código
+La API key de Google Maps se configura a través de **Firebase Remote Config**:
 
-- Nombres de archivos: snake_case
-- Nombres de clases: PascalCase
-- Nombres de variables y funciones: camelCase
-- Providers: Sufijo con Provider (AuthProvider)
-- Controllers: Sufijo con Controller (AuthController)
-- Estados: Sufijo con State (AuthState)
-- Repositorios: Sufijo con Repository (AuthRepository)
-- Casos de uso: Sufijo con UseCase (LoginUseCase)
+1. Obtén una API key de Google Cloud Console
+2. Configúrala en Firebase Remote Config como `google_maps_api_key`
+3. La app la obtendrá automáticamente al inicializar
 
-### Gestión de Estado
+### Firebase
 
-La aplicación utiliza Riverpod para la gestión del estado. Los providers se organizan por features y siguen estas convenciones:
+- **Remote Config**: Para configuración dinámica
+- **Crashlytics**: Para reportes de errores
+- **Analytics**: Para métricas de uso
 
-- StateNotifierProvider: Para estados complejos con lógica de negocio
-- StateProvider: Para estados simples
-- FutureProvider: Para operaciones asíncronas
-- Provider: Para dependencias y computaciones
+## 🧪 Testing
 
-### Inyección de Dependencias
+```bash
+# Ejecutar tests unitarios
+flutter test
 
-Riverpod maneja la inyección de dependencias de manera nativa:
-- Cada feature declara sus propios providers
-- Los providers globales se declaran en core/di
-- Se utiliza el patrón repository para el acceso a datos
-- Los providers son fácilmente sobrescribibles para testing
+# Ejecutar tests de widgets
+flutter test test/widget_test.dart
+```
+
+## 📦 Build
+
+### Android
+
+```bash
+flutter build apk --release
+```
+
+### iOS
+
+```bash
+flutter build ios --release
+```
+
+## 🚀 Deployment
+
+### Android
+
+1. Genera un keystore para firmar la app
+2. Configura las credenciales en `android/app/build.gradle`
+3. Ejecuta `flutter build appbundle --release`
+4. Sube el archivo a Google Play Console
+
+### iOS
+
+1. Configura certificados en Xcode
+2. Ejecuta `flutter build ios --release`
+3. Archiva y sube a App Store Connect
+
+## 📚 Documentación
+
+- [Configuración de Google Maps](GOOGLE_MAPS_SETUP.md)
+- [Configuración de Firebase Remote Config](FIREBASE_REMOTE_CONFIG_SETUP.md)
+- [Guía de Arquitectura](ARCHITECTURE.md)
+
+## 🤝 Contribuir
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+
+## 👨‍💻 Autor
+
+**Tu Nombre** - [tu-email@example.com](mailto:tu-email@example.com)
+
+## 🙏 Agradecimientos
+
+- Flutter team por el framework
+- Firebase team por las herramientas
+- Comunidad de desarrolladores Flutter

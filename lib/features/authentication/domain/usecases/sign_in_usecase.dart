@@ -10,7 +10,7 @@ class SignInUseCase {
   SignInUseCase(this.repository);
 
   Future<Either<Failure, User>> call(SignInParams params) {
-    return repository.signIn(
+    return repository.signInWithEmailAndPassword(
       email: params.email,
       password: params.password,
     );

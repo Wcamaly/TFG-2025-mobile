@@ -9,6 +9,28 @@ class StatsRepositoryImpl implements StatsRepository {
 
   StatsRepositoryImpl(this.remoteDataSource);
 
+  static final _mockStats = UserStats(
+    calories: 1800,
+    heartRate: 75,
+    weight: 70.5,
+    workoutMinutes: 45,
+    workoutsCompleted: 3,
+    weeklyProgress: [
+      DailyProgress(
+        date: DateTime(2024, 3, 1),
+        calories: 1800,
+        steps: 8000,
+        weight: 70.5,
+      ),
+      DailyProgress(
+        date: DateTime(2024, 3, 2),
+        calories: 2000,
+        steps: 10000,
+        weight: 70.4,
+      ),
+    ],
+  );
+
   @override
   Future<Either<Failure, UserStats>> getCurrentStats() async {
     try {

@@ -1,25 +1,53 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/user.dart';
 
-part 'user_model.freezed.dart';
-part 'user_model.g.dart';
+class UserModel extends User {
+  const UserModel({
+    required super.id,
+    required super.email,
+    required super.name,
+    super.photoUrl,
+    super.isEmailVerified = false,
+    super.createdAt,
+    super.lastLoginAt,
+  });
 
-@freezed
-class UserModel with _$UserModel {
-  const factory UserModel({
-    required String id,
-    required String email,
-    required String name,
-    required DateTime createdAt,
-  }) = _UserModel;
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'] as String,
+      email: json['email'] as String,
+      name: json['name'] as String,
+      photoUrl: json['photoUrl'] as String?,
+      isEmailVerified: json['isEmailVerified'] as bool? ?? false,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
+      lastLoginAt: json['lastLoginAt'] != null
+          ? DateTime.parse(json['lastLoginAt'] as String)
+          : null,
+    );
+  }
 
-  factory UserModel.fromJson(Map<String, dynamic> json) =>
-      _$UserModelFromJson(json);
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'email': email,
+      'name': name,
+      'photoUrl': photoUrl,
+      'isEmailVerified': isEmailVerified,
+      'createdAt': createdAt?.toIso8601String(),
+      'lastLoginAt': lastLoginAt?.toIso8601String(),
+    };
+  }
 
-  factory UserModel.fromEntity(User user) => UserModel(
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        createdAt: user.createdAt,
-      );
+  User toEntity() {
+    return User(
+      id: id,
+      email: email,
+      name: name,
+      photoUrl: photoUrl,
+      isEmailVerified: isEmailVerified,
+      createdAt: createdAt,
+      lastLoginAt: lastLoginAt,
+    );
+  }
 }

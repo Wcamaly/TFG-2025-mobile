@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "281328015422",
+    "project_id": "tfg-2025-57554",
+    "storage_bucket": "tfg-2025-57554.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:281328015422:android:785f27398ad61f614e996f",
+        "android_client_info": {
+          "package_name": "com.example.tfg"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAEzSX5Cy4LpiYxCXK3F7O95S4458GIvQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

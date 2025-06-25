@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tfg_2025_mobile/features/workouts/domain/entities/workout_progress.dart';
 import '../../features/authentication/presentation/pages/forgot_password_page.dart';
 import '../../features/authentication/presentation/pages/login_page.dart';
 import '../../features/authentication/presentation/pages/register_page.dart';
@@ -11,6 +12,9 @@ import '../../features/nutrition/presentation/pages/nutrition_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/workouts/presentation/pages/workout_detail_page.dart';
 import '../../features/workouts/presentation/pages/workouts_page.dart';
+import '../../features/trainers/presentation/pages/trainer_detail_page.dart';
+import '../../features/trainers/domain/entities/trainer.dart';
+import '../../features/subscriptions/presentation/pages/subscription_page.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -28,9 +32,22 @@ class AppRouter {
       case '/workouts':
         return MaterialPageRoute(builder: (_) => const WorkoutsPage());
       case '/workout-detail':
-        final workoutId = settings.arguments as String;
+        final goal = settings.arguments as DailyGoal;
         return MaterialPageRoute(
-          builder: (_) => WorkoutDetailPage(workoutId: workoutId),
+          builder: (_) => WorkoutDetailPage(goal: goal),
+        );
+      case '/trainer-detail':
+        final trainer = settings.arguments as Trainer;
+        return MaterialPageRoute(
+          builder: (_) => TrainerDetailPage(trainer: trainer),
+        );
+      case '/subscription':
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => SubscriptionPage(
+            trainer: args['trainer'] as Trainer,
+            package: args['package'] as TrainerPackage,
+          ),
         );
       case '/nutrition':
         return MaterialPageRoute(builder: (_) => const NutritionPage());

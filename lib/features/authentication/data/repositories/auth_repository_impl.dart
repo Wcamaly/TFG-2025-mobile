@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
@@ -7,39 +8,61 @@ import '../datasources/auth_remote_data_source.dart';
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
 
-  AuthRepositoryImpl(this.remoteDataSource);
+  AuthRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<Either<Failure, User>> signIn({
+  Future<Either<Failure, User>> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
-      final userModel = await remoteDataSource.signIn(
+      final userModel = await remoteDataSource.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      return Right(userModel);
+      return Right(userModel.toEntity());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message ?? 'Server error'));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message ?? 'Network error'));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(UnknownFailure(message: e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, User>> signUp({
+  Future<Either<Failure, User>> signUpWithEmailAndPassword({
     required String email,
     required String password,
     required String name,
   }) async {
     try {
-      final userModel = await remoteDataSource.signUp(
+      final userModel = await remoteDataSource.signUpWithEmailAndPassword(
         email: email,
         password: password,
         name: name,
       );
-      return Right(userModel);
+      return Right(userModel.toEntity());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message ?? 'Server error'));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message ?? 'Network error'));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> signInWithGoogle() async {
+    try {
+      final userModel = await remoteDataSource.signInWithGoogle();
+      return Right(userModel.toEntity());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message ?? 'Server error'));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message ?? 'Network error'));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
     }
   }
 
@@ -48,8 +71,22 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await remoteDataSource.signOut();
       return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message ?? 'Server error'));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> resetPassword(String email) async {
+    try {
+      await remoteDataSource.resetPassword(email);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message ?? 'Server error'));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
     }
   }
 
@@ -57,19 +94,15 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, User?>> getCurrentUser() async {
     try {
       final userModel = await remoteDataSource.getCurrentUser();
-      return Right(userModel);
+      return Right(userModel?.toEntity());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message ?? 'Server error'));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(UnknownFailure(message: e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, void>> resetPassword({required String email}) async {
-    try {
-      await remoteDataSource.resetPassword(email: email);
-      return const Right(null);
-    } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
-    }
-  }
+  Stream<User?> get authStateChanges => remoteDataSource.authStateChanges
+      .map((userModel) => userModel?.toEntity());
 }

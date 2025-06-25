@@ -21,6 +21,7 @@ mixin _$OnboardingState {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(List<OnboardingSlide> slides) loaded,
+    required TResult Function() completed,
     required TResult Function(String message) error,
   }) =>
       throw _privateConstructorUsedError;
@@ -29,6 +30,7 @@ mixin _$OnboardingState {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(List<OnboardingSlide> slides)? loaded,
+    TResult? Function()? completed,
     TResult? Function(String message)? error,
   }) =>
       throw _privateConstructorUsedError;
@@ -37,6 +39,7 @@ mixin _$OnboardingState {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<OnboardingSlide> slides)? loaded,
+    TResult Function()? completed,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) =>
@@ -46,6 +49,7 @@ mixin _$OnboardingState {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
+    required TResult Function(_Completed value) completed,
     required TResult Function(_Error value) error,
   }) =>
       throw _privateConstructorUsedError;
@@ -54,6 +58,7 @@ mixin _$OnboardingState {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_Completed value)? completed,
     TResult? Function(_Error value)? error,
   }) =>
       throw _privateConstructorUsedError;
@@ -62,6 +67,7 @@ mixin _$OnboardingState {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Loaded value)? loaded,
+    TResult Function(_Completed value)? completed,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) =>
@@ -133,6 +139,7 @@ class _$InitialImpl implements _Initial {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(List<OnboardingSlide> slides) loaded,
+    required TResult Function() completed,
     required TResult Function(String message) error,
   }) {
     return initial();
@@ -144,6 +151,7 @@ class _$InitialImpl implements _Initial {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(List<OnboardingSlide> slides)? loaded,
+    TResult? Function()? completed,
     TResult? Function(String message)? error,
   }) {
     return initial?.call();
@@ -155,6 +163,7 @@ class _$InitialImpl implements _Initial {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<OnboardingSlide> slides)? loaded,
+    TResult Function()? completed,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -170,6 +179,7 @@ class _$InitialImpl implements _Initial {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
+    required TResult Function(_Completed value) completed,
     required TResult Function(_Error value) error,
   }) {
     return initial(this);
@@ -181,6 +191,7 @@ class _$InitialImpl implements _Initial {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_Completed value)? completed,
     TResult? Function(_Error value)? error,
   }) {
     return initial?.call(this);
@@ -192,6 +203,7 @@ class _$InitialImpl implements _Initial {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Loaded value)? loaded,
+    TResult Function(_Completed value)? completed,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -250,6 +262,7 @@ class _$LoadingImpl implements _Loading {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(List<OnboardingSlide> slides) loaded,
+    required TResult Function() completed,
     required TResult Function(String message) error,
   }) {
     return loading();
@@ -261,6 +274,7 @@ class _$LoadingImpl implements _Loading {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(List<OnboardingSlide> slides)? loaded,
+    TResult? Function()? completed,
     TResult? Function(String message)? error,
   }) {
     return loading?.call();
@@ -272,6 +286,7 @@ class _$LoadingImpl implements _Loading {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<OnboardingSlide> slides)? loaded,
+    TResult Function()? completed,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -287,6 +302,7 @@ class _$LoadingImpl implements _Loading {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
+    required TResult Function(_Completed value) completed,
     required TResult Function(_Error value) error,
   }) {
     return loading(this);
@@ -298,6 +314,7 @@ class _$LoadingImpl implements _Loading {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_Completed value)? completed,
     TResult? Function(_Error value)? error,
   }) {
     return loading?.call(this);
@@ -309,6 +326,7 @@ class _$LoadingImpl implements _Loading {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Loaded value)? loaded,
+    TResult Function(_Completed value)? completed,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -400,6 +418,7 @@ class _$LoadedImpl implements _Loaded {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(List<OnboardingSlide> slides) loaded,
+    required TResult Function() completed,
     required TResult Function(String message) error,
   }) {
     return loaded(slides);
@@ -411,6 +430,7 @@ class _$LoadedImpl implements _Loaded {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(List<OnboardingSlide> slides)? loaded,
+    TResult? Function()? completed,
     TResult? Function(String message)? error,
   }) {
     return loaded?.call(slides);
@@ -422,6 +442,7 @@ class _$LoadedImpl implements _Loaded {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<OnboardingSlide> slides)? loaded,
+    TResult Function()? completed,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -437,6 +458,7 @@ class _$LoadedImpl implements _Loaded {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
+    required TResult Function(_Completed value) completed,
     required TResult Function(_Error value) error,
   }) {
     return loaded(this);
@@ -448,6 +470,7 @@ class _$LoadedImpl implements _Loaded {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_Completed value)? completed,
     TResult? Function(_Error value)? error,
   }) {
     return loaded?.call(this);
@@ -459,6 +482,7 @@ class _$LoadedImpl implements _Loaded {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Loaded value)? loaded,
+    TResult Function(_Completed value)? completed,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -479,6 +503,129 @@ abstract class _Loaded implements OnboardingState {
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$LoadedImplCopyWith<_$LoadedImpl> get copyWith =>
       throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$CompletedImplCopyWith<$Res> {
+  factory _$$CompletedImplCopyWith(
+          _$CompletedImpl value, $Res Function(_$CompletedImpl) then) =
+      __$$CompletedImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$CompletedImplCopyWithImpl<$Res>
+    extends _$OnboardingStateCopyWithImpl<$Res, _$CompletedImpl>
+    implements _$$CompletedImplCopyWith<$Res> {
+  __$$CompletedImplCopyWithImpl(
+      _$CompletedImpl _value, $Res Function(_$CompletedImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of OnboardingState
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$CompletedImpl implements _Completed {
+  const _$CompletedImpl();
+
+  @override
+  String toString() {
+    return 'OnboardingState.completed()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$CompletedImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(List<OnboardingSlide> slides) loaded,
+    required TResult Function() completed,
+    required TResult Function(String message) error,
+  }) {
+    return completed();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(List<OnboardingSlide> slides)? loaded,
+    TResult? Function()? completed,
+    TResult? Function(String message)? error,
+  }) {
+    return completed?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(List<OnboardingSlide> slides)? loaded,
+    TResult Function()? completed,
+    TResult Function(String message)? error,
+    required TResult orElse(),
+  }) {
+    if (completed != null) {
+      return completed();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Initial value) initial,
+    required TResult Function(_Loading value) loading,
+    required TResult Function(_Loaded value) loaded,
+    required TResult Function(_Completed value) completed,
+    required TResult Function(_Error value) error,
+  }) {
+    return completed(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Initial value)? initial,
+    TResult? Function(_Loading value)? loading,
+    TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_Completed value)? completed,
+    TResult? Function(_Error value)? error,
+  }) {
+    return completed?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Initial value)? initial,
+    TResult Function(_Loading value)? loading,
+    TResult Function(_Loaded value)? loaded,
+    TResult Function(_Completed value)? completed,
+    TResult Function(_Error value)? error,
+    required TResult orElse(),
+  }) {
+    if (completed != null) {
+      return completed(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _Completed implements OnboardingState {
+  const factory _Completed() = _$CompletedImpl;
 }
 
 /// @nodoc
@@ -552,6 +699,7 @@ class _$ErrorImpl implements _Error {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(List<OnboardingSlide> slides) loaded,
+    required TResult Function() completed,
     required TResult Function(String message) error,
   }) {
     return error(message);
@@ -563,6 +711,7 @@ class _$ErrorImpl implements _Error {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(List<OnboardingSlide> slides)? loaded,
+    TResult? Function()? completed,
     TResult? Function(String message)? error,
   }) {
     return error?.call(message);
@@ -574,6 +723,7 @@ class _$ErrorImpl implements _Error {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<OnboardingSlide> slides)? loaded,
+    TResult Function()? completed,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -589,6 +739,7 @@ class _$ErrorImpl implements _Error {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
+    required TResult Function(_Completed value) completed,
     required TResult Function(_Error value) error,
   }) {
     return error(this);
@@ -600,6 +751,7 @@ class _$ErrorImpl implements _Error {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_Completed value)? completed,
     TResult? Function(_Error value)? error,
   }) {
     return error?.call(this);
@@ -611,6 +763,7 @@ class _$ErrorImpl implements _Error {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Loaded value)? loaded,
+    TResult Function(_Completed value)? completed,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {

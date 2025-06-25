@@ -5,10 +5,10 @@ import '../../domain/repositories/trainer_repository.dart';
 
 class TrainerRepositoryImpl implements TrainerRepository {
   final List<Trainer> _mockTrainers = [
-    Trainer(
+    const Trainer(
       id: '1',
       name: 'John Doe',
-      photoUrl: 'assets/images/trainer1.jpg',
+      photoUrl: 'assets/images/trainer1.png',
       rating: 4.8,
       languages: ['English', 'Spanish'],
       description: 'Certified personal trainer with 5 years of experience',
@@ -30,7 +30,7 @@ class TrainerRepositoryImpl implements TrainerRepository {
           difficulty: 'Advanced',
         ),
       ],
-      location: const Location(
+      location: Location(
         latitude: 40.7128,
         longitude: -74.0060,
         address: '123 Fitness St',
@@ -38,10 +38,10 @@ class TrainerRepositoryImpl implements TrainerRepository {
         country: 'USA',
       ),
     ),
-    Trainer(
+    const Trainer(
       id: '2',
       name: 'Jane Smith',
-      photoUrl: 'assets/images/trainer2.jpg',
+      photoUrl: 'assets/images/trainer2.png',
       rating: 4.9,
       languages: ['English', 'French'],
       description: 'Specialized in HIIT and nutrition',

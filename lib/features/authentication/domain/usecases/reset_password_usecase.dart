@@ -9,7 +9,7 @@ class ResetPasswordUseCase {
   ResetPasswordUseCase(this.repository);
 
   Future<Either<Failure, void>> call(ResetPasswordParams params) {
-    return repository.resetPassword(email: params.email);
+    return repository.resetPassword(params.email);
   }
 }
 

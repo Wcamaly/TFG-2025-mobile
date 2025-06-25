@@ -47,24 +47,32 @@ class WorkoutsNotifier extends StateNotifier<WorkoutsState> {
   }
 
   void filterByCategory(String? category) {
-    if (state is! _Loaded) return;
-    final currentState = state as _Loaded;
-    loadWorkouts(
-      category: category == 'All' ? null : category,
-      difficulty: currentState.selectedDifficulty == 'All'
-          ? null
-          : currentState.selectedDifficulty,
+    state.when(
+      initial: () {},
+      loading: () {},
+      error: (_) {},
+      loaded: (workouts, categories, difficulties, selectedCategory,
+          selectedDifficulty) {
+        loadWorkouts(
+          category: category == 'All' ? null : category,
+          difficulty: selectedDifficulty == 'All' ? null : selectedDifficulty,
+        );
+      },
     );
   }
 
   void filterByDifficulty(String? difficulty) {
-    if (state is! _Loaded) return;
-    final currentState = state as _Loaded;
-    loadWorkouts(
-      category: currentState.selectedCategory == 'All'
-          ? null
-          : currentState.selectedCategory,
-      difficulty: difficulty == 'All' ? null : difficulty,
+    state.when(
+      initial: () {},
+      loading: () {},
+      error: (_) {},
+      loaded: (workouts, categories, difficulties, selectedCategory,
+          selectedDifficulty) {
+        loadWorkouts(
+          category: selectedCategory == 'All' ? null : selectedCategory,
+          difficulty: difficulty == 'All' ? null : difficulty,
+        );
+      },
     );
   }
 }

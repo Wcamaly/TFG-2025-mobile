@@ -19,6 +19,8 @@ mixin _$UserStats {
   int get calories => throw _privateConstructorUsedError;
   int get heartRate => throw _privateConstructorUsedError;
   double get weight => throw _privateConstructorUsedError;
+  int get workoutMinutes => throw _privateConstructorUsedError;
+  int get workoutsCompleted => throw _privateConstructorUsedError;
   List<DailyProgress> get weeklyProgress => throw _privateConstructorUsedError;
 
   /// Create a copy of UserStats
@@ -37,6 +39,8 @@ abstract class $UserStatsCopyWith<$Res> {
       {int calories,
       int heartRate,
       double weight,
+      int workoutMinutes,
+      int workoutsCompleted,
       List<DailyProgress> weeklyProgress});
 }
 
@@ -58,6 +62,8 @@ class _$UserStatsCopyWithImpl<$Res, $Val extends UserStats>
     Object? calories = null,
     Object? heartRate = null,
     Object? weight = null,
+    Object? workoutMinutes = null,
+    Object? workoutsCompleted = null,
     Object? weeklyProgress = null,
   }) {
     return _then(_value.copyWith(
@@ -73,6 +79,14 @@ class _$UserStatsCopyWithImpl<$Res, $Val extends UserStats>
           ? _value.weight
           : weight // ignore: cast_nullable_to_non_nullable
               as double,
+      workoutMinutes: null == workoutMinutes
+          ? _value.workoutMinutes
+          : workoutMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
+      workoutsCompleted: null == workoutsCompleted
+          ? _value.workoutsCompleted
+          : workoutsCompleted // ignore: cast_nullable_to_non_nullable
+              as int,
       weeklyProgress: null == weeklyProgress
           ? _value.weeklyProgress
           : weeklyProgress // ignore: cast_nullable_to_non_nullable
@@ -93,6 +107,8 @@ abstract class _$$UserStatsImplCopyWith<$Res>
       {int calories,
       int heartRate,
       double weight,
+      int workoutMinutes,
+      int workoutsCompleted,
       List<DailyProgress> weeklyProgress});
 }
 
@@ -112,6 +128,8 @@ class __$$UserStatsImplCopyWithImpl<$Res>
     Object? calories = null,
     Object? heartRate = null,
     Object? weight = null,
+    Object? workoutMinutes = null,
+    Object? workoutsCompleted = null,
     Object? weeklyProgress = null,
   }) {
     return _then(_$UserStatsImpl(
@@ -127,6 +145,14 @@ class __$$UserStatsImplCopyWithImpl<$Res>
           ? _value.weight
           : weight // ignore: cast_nullable_to_non_nullable
               as double,
+      workoutMinutes: null == workoutMinutes
+          ? _value.workoutMinutes
+          : workoutMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
+      workoutsCompleted: null == workoutsCompleted
+          ? _value.workoutsCompleted
+          : workoutsCompleted // ignore: cast_nullable_to_non_nullable
+              as int,
       weeklyProgress: null == weeklyProgress
           ? _value._weeklyProgress
           : weeklyProgress // ignore: cast_nullable_to_non_nullable
@@ -142,6 +168,8 @@ class _$UserStatsImpl implements _UserStats {
       {required this.calories,
       required this.heartRate,
       required this.weight,
+      required this.workoutMinutes,
+      required this.workoutsCompleted,
       required final List<DailyProgress> weeklyProgress})
       : _weeklyProgress = weeklyProgress;
 
@@ -151,6 +179,10 @@ class _$UserStatsImpl implements _UserStats {
   final int heartRate;
   @override
   final double weight;
+  @override
+  final int workoutMinutes;
+  @override
+  final int workoutsCompleted;
   final List<DailyProgress> _weeklyProgress;
   @override
   List<DailyProgress> get weeklyProgress {
@@ -161,7 +193,7 @@ class _$UserStatsImpl implements _UserStats {
 
   @override
   String toString() {
-    return 'UserStats(calories: $calories, heartRate: $heartRate, weight: $weight, weeklyProgress: $weeklyProgress)';
+    return 'UserStats(calories: $calories, heartRate: $heartRate, weight: $weight, workoutMinutes: $workoutMinutes, workoutsCompleted: $workoutsCompleted, weeklyProgress: $weeklyProgress)';
   }
 
   @override
@@ -174,12 +206,22 @@ class _$UserStatsImpl implements _UserStats {
             (identical(other.heartRate, heartRate) ||
                 other.heartRate == heartRate) &&
             (identical(other.weight, weight) || other.weight == weight) &&
+            (identical(other.workoutMinutes, workoutMinutes) ||
+                other.workoutMinutes == workoutMinutes) &&
+            (identical(other.workoutsCompleted, workoutsCompleted) ||
+                other.workoutsCompleted == workoutsCompleted) &&
             const DeepCollectionEquality()
                 .equals(other._weeklyProgress, _weeklyProgress));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, calories, heartRate, weight,
+  int get hashCode => Object.hash(
+      runtimeType,
+      calories,
+      heartRate,
+      weight,
+      workoutMinutes,
+      workoutsCompleted,
       const DeepCollectionEquality().hash(_weeklyProgress));
 
   /// Create a copy of UserStats
@@ -196,6 +238,8 @@ abstract class _UserStats implements UserStats {
       {required final int calories,
       required final int heartRate,
       required final double weight,
+      required final int workoutMinutes,
+      required final int workoutsCompleted,
       required final List<DailyProgress> weeklyProgress}) = _$UserStatsImpl;
 
   @override
@@ -204,6 +248,10 @@ abstract class _UserStats implements UserStats {
   int get heartRate;
   @override
   double get weight;
+  @override
+  int get workoutMinutes;
+  @override
+  int get workoutsCompleted;
   @override
   List<DailyProgress> get weeklyProgress;
 

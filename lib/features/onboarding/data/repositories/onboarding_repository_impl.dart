@@ -1,44 +1,40 @@
 import 'package:dartz/dartz.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/onboarding_slide.dart';
 import '../../domain/repositories/onboarding_repository.dart';
+import 'package:flutter/painting.dart';
 
 class OnboardingRepositoryImpl implements OnboardingRepository {
-  bool _onboardingCompleted = false;
+  static const String _onboardingCompletedKey = 'onboarding_completed';
 
   @override
   Future<Either<Failure, List<OnboardingSlide>>> getOnboardingSlides() async {
     try {
-      return Right([
+      final slides = [
         const OnboardingSlide(
-          title: 'Build Your Mind and Body',
-          description: 'Start your journey to a healthier lifestyle today',
-          imageUrl: 'assets/images/onboarding1.jpg',
+          title: 'Get Stronger',
+          description:
+              'Build muscle and strength with our expert-designed workout plans.',
+          imageUrl: 'assets/images/onboarding/get_stronger.png',
           position: 0,
         ),
         const OnboardingSlide(
-          title: 'Expert Trainers',
-          description: 'Get personalized training from certified professionals',
-          imageUrl: 'assets/images/onboarding2.jpg',
+          title: 'Build Mind & Body',
+          description:
+              'Transform your body and mind with personalized fitness routines.',
+          imageUrl: 'assets/images/onboarding/build_mind_body.png',
           position: 1,
         ),
         const OnboardingSlide(
-          title: 'Track Your Progress',
-          description: 'Monitor your achievements and stay motivated',
-          imageUrl: 'assets/images/onboarding3.jpg',
+          title: 'Running Dream',
+          description:
+              'Achieve your running goals with guided training programs.',
+          imageUrl: 'assets/images/onboarding/running_dream.png',
           position: 2,
         ),
-      ]);
-    } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> markOnboardingAsCompleted() async {
-    try {
-      _onboardingCompleted = true;
-      return const Right(null);
+      ];
+      return Right(slides);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
@@ -47,7 +43,19 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
   @override
   Future<Either<Failure, bool>> isOnboardingCompleted() async {
     try {
-      return Right(_onboardingCompleted);
+      final prefs = await SharedPreferences.getInstance();
+      return Right(prefs.getBool(_onboardingCompletedKey) ?? false);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> markOnboardingAsCompleted() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_onboardingCompletedKey, true);
+      return const Right(null);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

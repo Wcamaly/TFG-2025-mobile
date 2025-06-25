@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/usecases/get_current_stats_usecase.dart';
+import 'package:tfg_2025_mobile/features/dashboard/presentation/providers/repository_providers.dart';
+import 'package:tfg_2025_mobile/features/dashboard/domain/usecases/get_current_stats_usecase.dart';
 import 'dashboard_state.dart';
 
 final dashboardProvider =
