@@ -90,13 +90,11 @@ class AppTheme {
       ),
 
       // Card
-      cardTheme: CardTheme(
-        color: AppColors.cardBackground,
+      cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
 
       // Divider

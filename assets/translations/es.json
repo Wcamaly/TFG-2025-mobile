@@ -11,53 +11,23 @@
     "settings": "Configuración",
     "signOut": "Cerrar Sesión",
     "dailyCalories": "Calorías Diarias",
-    "remaining": "Restante: {count} kcal",
-    "@@locale": "es",
-    
+    "remaining": "Restantes: {} kcal",
     "onboardingBuildMindTitle": "Construye tu Mente\ny Cuerpo",
-    "@onboardingBuildMindTitle": {
-        "description": "Título de la primera página del onboarding"
-    },
-    
-    "onboardingGetStrongerTitle": "Prepárate para ser\nmás Fuerte",
-    "@onboardingGetStrongerTitle": {
-        "description": "Título de la segunda página del onboarding"
-    },
-    
-    "onboardingRunningDreamTitle": "Corre hacia tu\nSueño",
-    "@onboardingRunningDreamTitle": {
-        "description": "Título de la tercera página del onboarding"
-    },
-    
+    "onboardingGetStrongerTitle": "Hazte Más Fuerte\npara la Preparación",
+    "onboardingRunningDreamTitle": "Corriendo hacia\ntu Sueño",
     "onboardingInspiration": "Sé una Inspiración",
-    "@onboardingInspiration": {
-        "description": "Subtítulo común en las páginas de onboarding"
-    },
-    
     "onboardingNext": "Siguiente",
-    "@onboardingNext": {
-        "description": "Texto del botón para avanzar en el onboarding"
-    },
-    
     "onboardingGetStarted": "Comenzar",
-    "@onboardingGetStarted": {
-        "description": "Texto del botón final del onboarding"
-    },
-    
     "onboardingSkip": "Saltar",
-    "@onboardingSkip": {
-        "description": "Texto del botón saltar en onboarding"
-    },
-    
     "buildYourBody": "Construye tu Cuerpo",
     "buildingProgress": "Progreso de Construcción",
     "dailyGoals": "Objetivos Diarios",
     "bicepsTricepsTraining": "Entrenamiento de Bíceps y Tríceps",
     "totalActivity": "Actividad Total",
     "caloriesBurnedKKal": "Calorías Quemadas",
-    "percent": "Porciento",
+    "percent": "Porcentaje",
     "monitoring": "Monitoreo",
-    "dailyProgress": "Progreso Diario",
+    "dailyProgress": "Progreso diario",
     "warmWelcome": "Una Cálida Bienvenida",
     "strengthEssentials": "Fundamentos de Fuerza: Tu Primera Rutina",
     "scoopOfJoy": "Cucharada de Alegría",
@@ -66,5 +36,16 @@
     "workoutOfTheDay": "Entrenamiento del Día",
     "searchWorkouts": "Buscar Entrenamientos",
     "workoutHistory": "Historial de Entrenamientos",
-    "myStats": "Mis Estadísticas"
+    "myStats": "Mis Estadísticas",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "login": "Iniciar Sesión",
+    "enterEmail": "Por favor ingresa tu correo electrónico",
+    "validEmail": "Por favor ingresa un correo electrónico válido",
+    "enterPassword": "Por favor ingresa tu contraseña",
+    "passwordLength": "La contraseña debe tener al menos 6 caracteres",
+    "orContinueWith": "o continuar con",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "noAccount": "¿No tienes una cuenta?",
+    "signUp": "Registrarse"
 } 

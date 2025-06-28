@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/buttons/primary_button.dart';
@@ -58,7 +58,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final onboardingState = ref.watch(onboardingProvider);
 
     return Scaffold(
@@ -77,7 +76,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   child: TextButton(
                     onPressed: _completeOnboarding,
                     child: Text(
-                      l10n.onboardingSkip,
+                      'onboardingSkip'.tr(),
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -125,8 +124,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 padding: const EdgeInsets.all(24.0),
                 child: PrimaryButton(
                   text: _currentIndex == slides.length - 1
-                      ? l10n.onboardingGetStarted
-                      : l10n.onboardingNext,
+                      ? 'onboardingGetStarted'.tr()
+                      : 'onboardingNext'.tr(),
                   onPressed: _nextPage,
                 ),
               ),

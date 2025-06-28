@@ -48,7 +48,7 @@
 	
 	<!-- Google Maps API Key para iOS -->
 	<key>GMSApiKey</key>
-	<string>$(GOOGLE_MAPS_API_KEY)</string>
+	<string>AIzaSyBKDOjEk3pHQDUGhPMRdD46oLKGK6xHAXM</string>
 	
 	<!-- Permisos de ubicación para iOS -->
 	<key>NSLocationWhenInUseUsageDescription</key>

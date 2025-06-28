@@ -9,15 +9,13 @@ import GoogleMaps
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     // CRÍTICO: Configurar Google Maps API Key antes de registrar plugins
-    // La API key debe ser la misma que tienes en Firebase Remote Config
-    if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
-       let plist = NSDictionary(contentsOfFile: path),
-       let apiKey = plist["API_KEY"] as? String {
+    // Usar la API key desde Info.plist que se configura con variables de entorno
+    if let apiKey = Bundle.main.object(forInfoDictionaryKey: "GMSApiKey") as? String {
+      print("🗺️ iOS: Configurando Google Maps con API Key: \(String(apiKey.prefix(10)))...")
       GMSServices.provideAPIKey(apiKey)
     } else {
-      // Fallback: usar API key hardcodeada temporalmente
-      // REEMPLAZA CON TU API KEY REAL - la misma de Firebase Remote Config
-      GMSServices.provideAPIKey("AIzaSyBKDOjEk3pHQDUGhPMRdD46oLKGK6xHAXM")
+      print("❌ iOS: No se pudo obtener la API Key de Google Maps desde Info.plist")
+      print("❌ iOS: Verifica que GOOGLE_MAPS_API_KEY esté configurada en las variables de entorno")
     }
     
     GeneratedPluginRegistrant.register(with: self)

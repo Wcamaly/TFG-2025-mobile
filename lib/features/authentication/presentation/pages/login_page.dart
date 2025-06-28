@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/widgets/inputs/custom_text_field.dart';
 import '../../../../core/widgets/buttons/primary_button.dart';
 import '../../../../core/widgets/buttons/social_button.dart';
@@ -94,7 +95,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 // Email Field
                 CustomTextField(
                   controller: _emailController,
-                  hint: 'Email',
+                  hint: 'email'.tr(),
                   keyboardType: TextInputType.emailAddress,
                   prefixIcon: const Icon(
                     Icons.person_outline,
@@ -102,10 +103,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return 'enterEmail'.tr();
                     }
                     if (!value.contains('@')) {
-                      return 'Please enter a valid email';
+                      return 'validEmail'.tr();
                     }
                     return null;
                   },
@@ -115,7 +116,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 // Password Field
                 CustomTextField(
                   controller: _passwordController,
-                  hint: 'Password',
+                  hint: 'password'.tr(),
                   obscureText: _obscurePassword,
                   prefixIcon: const Icon(
                     Icons.lock_outline,
@@ -136,10 +137,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
+                      return 'enterPassword'.tr();
                     }
                     if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
+                      return 'passwordLength'.tr();
                     }
                     return null;
                   },
@@ -148,7 +149,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 // Login Button
                 PrimaryButton(
-                  text: 'Login',
+                  text: 'login'.tr(),
                   isLoading: authState.when(
                     initial: () => false,
                     loading: () => true,
@@ -168,39 +169,30 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // Social Login
-                Text(
-                  'login with',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
+                // Divider
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SocialButton(
-                      type: SocialButtonType.facebook,
-                      onPressed: () {
-                        // TODO: Implement Facebook login
-                      },
+                    const Expanded(child: Divider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'orContinueWith'.tr(),
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: 16),
-                    SocialButton(
-                      type: SocialButtonType.google,
-                      onPressed: () {
-                        ref.read(authProvider.notifier).signInWithGoogle();
-                      },
-                    ),
-                    const SizedBox(width: 16),
-                    SocialButton(
-                      type: SocialButtonType.twitter,
-                      onPressed: () {
-                        // TODO: Implement Twitter login
-                      },
-                    ),
+                    const Expanded(child: Divider()),
                   ],
+                ),
+                const SizedBox(height: 24),
+
+                // Google Login Only
+                SocialButton(
+                  type: SocialButtonType.google,
+                  onPressed: () {
+                    ref.read(authProvider.notifier).signInWithGoogle();
+                  },
                 ),
                 const SizedBox(height: 32),
 
@@ -210,7 +202,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     Navigator.pushNamed(context, '/forgot-password');
                   },
                   child: Text(
-                    'Forgot Password?',
+                    'forgotPassword'.tr(),
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.textSecondary,
                       decoration: TextDecoration.underline,
@@ -224,17 +216,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account? ",
+                      'noAccount'.tr(),
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: AppColors.textSecondary,
                       ),
                     ),
+                    const SizedBox(width: 4),
                     TextButton(
                       onPressed: () {
                         Navigator.pushNamed(context, '/register');
                       },
                       child: Text(
-                        'Sign Up',
+                        'signUp'.tr(),
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,

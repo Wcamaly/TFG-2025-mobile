@@ -5,6 +5,7 @@ class WorkoutCard extends StatelessWidget {
   final String duration;
   final String difficulty;
   final String imageUrl;
+  final VoidCallback? onTap;
 
   const WorkoutCard({
     super.key,
@@ -12,6 +13,7 @@ class WorkoutCard extends StatelessWidget {
     required this.duration,
     required this.difficulty,
     required this.imageUrl,
+    this.onTap,
   });
 
   @override
@@ -40,9 +42,10 @@ class WorkoutCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            Navigator.pushNamed(context, '/workouts');
-          },
+          onTap: onTap ??
+              () {
+                Navigator.pushNamed(context, '/workouts');
+              },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16.0),

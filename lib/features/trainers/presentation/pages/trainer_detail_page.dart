@@ -239,21 +239,27 @@ class _TrainerInfoSection extends StatelessWidget {
               const Spacer(),
 
               // Location
-              Row(
-                children: [
-                  Icon(
-                    Icons.location_on,
-                    color: AppColors.textSecondary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    trainer.location,
-                    style: AppTextStyles.bodyMedium.copyWith(
+              Expanded(
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.location_on,
                       color: AppColors.textSecondary,
+                      size: 20,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        trainer.location,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

@@ -11,7 +11,8 @@ import '../../../trainers/presentation/pages/trainer_search_page.dart';
 import '../../../workouts/presentation/pages/workouts_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import 'tabs/nutrition_tab.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../../../onboarding/presentation/providers/onboarding_provider.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -24,11 +25,23 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   int _currentIndex = 0;
 
   List<Widget> get _pages => [
-        HomeTab(onNavigateToTrainers: () {
-          setState(() {
-            _currentIndex = 1;
-          });
-        }),
+        HomeTab(
+          onNavigateToTrainers: () {
+            setState(() {
+              _currentIndex = 1;
+            });
+          },
+          onNavigateToWorkouts: () {
+            setState(() {
+              _currentIndex = 2;
+            });
+          },
+          onNavigateToNutrition: () {
+            setState(() {
+              _currentIndex = 3;
+            });
+          },
+        ),
         const TrainerSearchPage(),
         const WorkoutsPage(),
         const NutritionTab(),
@@ -79,10 +92,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
 class HomeTab extends ConsumerWidget {
   final VoidCallback onNavigateToTrainers;
+  final VoidCallback onNavigateToWorkouts;
+  final VoidCallback onNavigateToNutrition;
 
   const HomeTab({
     super.key,
     required this.onNavigateToTrainers,
+    required this.onNavigateToWorkouts,
+    required this.onNavigateToNutrition,
   });
 
   @override
@@ -102,7 +119,7 @@ class HomeTab extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AppLocalizations.of(context)!.welcomeBack,
+                      'welcomeBack'.tr(),
                       style: AppTextStyles.bodyLarge.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -136,7 +153,7 @@ class HomeTab extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              AppLocalizations.of(context)!.todaysStats,
+              'todaysStats'.tr(),
               style: AppTextStyles.headlineLarge,
             ),
             const SizedBox(height: 16),
@@ -183,41 +200,42 @@ class HomeTab extends ConsumerWidget {
                 children: [
                   Container(
                     width: 280,
-                    child: const WorkoutCard(
+                    child: WorkoutCard(
                       title: 'Full Body Workout',
                       duration: '45 min',
                       difficulty: 'Intermediate',
                       imageUrl: '',
+                      onTap: onNavigateToWorkouts,
                     ),
                   ),
                   const SizedBox(width: 16),
                   Container(
                     width: 280,
-                    child: const WorkoutCard(
+                    child: WorkoutCard(
                       title: 'HIIT Training',
                       duration: '30 min',
                       difficulty: 'Advanced',
                       imageUrl: '',
+                      onTap: onNavigateToWorkouts,
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Nutrition',
-                  style: AppTextStyles.headlineLarge,
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Navegar a la sección de nutrición
-                  },
-                  child: const Text('See All'),
-                ),
-              ],
+            const Text(
+              'Nutrition',
+              style: AppTextStyles.headlineLarge,
+            ),
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: onNavigateToNutrition,
+              child: const NutritionCardSimple(
+                calories: 1450,
+                protein: 85,
+                carbs: 180,
+                fats: 65,
+              ),
             ),
             const SizedBox(height: 16),
           ],
