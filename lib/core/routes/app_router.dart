@@ -19,6 +19,11 @@ import '../../features/trainers/presentation/pages/trainer_detail_page.dart';
 import '../../features/trainers/presentation/pages/trainer_search_page.dart';
 import '../../features/trainers/domain/entities/trainer.dart';
 import '../../features/subscriptions/presentation/pages/subscription_page.dart';
+import '../../features/trainer_dashboard/presentation/pages/trainer_dashboard_page.dart';
+import '../../features/trainer_students/presentation/pages/student_detail_page.dart';
+import '../../features/trainer_dashboard/domain/entities/student.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/profile/presentation/pages/settings_page.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -37,6 +42,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const ForgotPasswordPage());
       case '/dashboard':
         return MaterialPageRoute(builder: (_) => const DashboardPage());
+      case '/trainer-dashboard':
+        return MaterialPageRoute(builder: (_) => const TrainerDashboardPage());
       case '/trainer-search':
         return MaterialPageRoute(builder: (_) => const TrainerSearchPage());
       case '/workouts':
@@ -50,6 +57,11 @@ class AppRouter {
         final trainer = settings.arguments as Trainer;
         return MaterialPageRoute(
           builder: (_) => TrainerDetailPage(trainer: trainer),
+        );
+      case '/student-detail':
+        final student = settings.arguments as Student;
+        return MaterialPageRoute(
+          builder: (_) => StudentDetailPage(student: student),
         );
       case '/subscription':
         final args = settings.arguments as Map<String, dynamic>;
@@ -76,6 +88,10 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const NutritionGoalsPage());
       case '/meal-schedule':
         return MaterialPageRoute(builder: (_) => const MealSchedulePage());
+      case '/profile':
+        return MaterialPageRoute(builder: (_) => const ProfilePage());
+      case '/settings':
+        return MaterialPageRoute(builder: (_) => const SettingsPage());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

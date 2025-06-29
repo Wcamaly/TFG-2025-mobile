@@ -4,10 +4,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/widgets/inputs/custom_text_field.dart';
 import '../../../../core/widgets/buttons/primary_button.dart';
-import '../../../../core/widgets/buttons/social_button.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/database/tables/users_table.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/social_login_button.dart';
+import '../../domain/entities/user.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -36,7 +38,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         initial: () {},
         loading: () {},
         authenticated: (user) {
-          Navigator.pushReplacementNamed(context, '/dashboard');
+          final route = user.role == UserRole.trainer
+              ? '/trainer-dashboard'
+              : '/dashboard';
+          Navigator.pushReplacementNamed(context, route);
         },
         unauthenticated: (message) {
           if (message != 'No user found') {
@@ -56,14 +61,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 60),
+                const SizedBox(height: 40),
 
                 // Logo
                 SvgPicture.asset(
@@ -71,7 +76,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   width: 80,
                   height: 80,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
                 // App Name
                 Text(
@@ -81,16 +86,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     letterSpacing: 2,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
 
                 // Subtitle
                 Text(
-                  'Be an Inspiration',
+                  'beAnInspiration'.tr(),
                   style: AppTextStyles.bodyLarge.copyWith(
                     color: AppColors.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 60),
+                const SizedBox(height: 40),
 
                 // Email Field
                 CustomTextField(
@@ -145,7 +150,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
                 // Login Button
                 PrimaryButton(
@@ -167,34 +172,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     }
                   },
                 ),
-                const SizedBox(height: 24),
 
-                // Divider
-                Row(
-                  children: [
-                    const Expanded(child: Divider()),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'orContinueWith'.tr(),
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    const Expanded(child: Divider()),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // Google Login Only
-                SocialButton(
-                  type: SocialButtonType.google,
-                  onPressed: () {
-                    ref.read(authProvider.notifier).signInWithGoogle();
-                  },
-                ),
-                const SizedBox(height: 32),
+                const Spacer(),
 
                 // Forgot Password
                 TextButton(
@@ -210,6 +189,41 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                // Reset Database Button (Temporal para debugging)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                      onPressed: () async {
+                        await ref.read(authProvider.notifier).resetDatabase();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('databaseReset'.tr()),
+                            backgroundColor: AppColors.success,
+                          ),
+                        );
+                      },
+                      child: Text(
+                        'resetDB'.tr(),
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.warning,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        await ref.read(authProvider.notifier).listAllUsers();
+                      },
+                      child: Text(
+                        'listUsers'.tr(),
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
 
                 // Sign Up Link
                 Row(
@@ -236,6 +250,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -244,3 +259,33 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 }
+
+// TODO: Implementar Google SSO en el futuro
+// Código comentado para futura implementación:
+/*
+                // Divider
+                Row(
+                  children: [
+                    const Expanded(child: Divider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'orContinueWith'.tr(),
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    const Expanded(child: Divider()),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Google Login
+                SocialButton(
+                  type: SocialButtonType.google,
+                  onPressed: () {
+                    ref.read(authProvider.notifier).signInWithGoogle();
+                  },
+                ),
+*/

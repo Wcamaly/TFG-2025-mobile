@@ -1,3 +1,16 @@
+import '../../../../core/database/tables/users_table.dart';
+
+extension UserRoleExtension on UserRole {
+  String get displayName {
+    switch (this) {
+      case UserRole.user:
+        return 'Usuario';
+      case UserRole.trainer:
+        return 'Entrenador';
+    }
+  }
+}
+
 class User {
   final String id;
   final String email;
@@ -6,6 +19,7 @@ class User {
   final bool isEmailVerified;
   final DateTime? createdAt;
   final DateTime? lastLoginAt;
+  final UserRole role;
 
   const User({
     required this.id,
@@ -15,6 +29,7 @@ class User {
     this.isEmailVerified = false,
     this.createdAt,
     this.lastLoginAt,
+    this.role = UserRole.user,
   });
 
   Map<String, dynamic> toJson() {
@@ -26,6 +41,7 @@ class User {
       'isEmailVerified': isEmailVerified,
       'createdAt': createdAt?.toIso8601String(),
       'lastLoginAt': lastLoginAt?.toIso8601String(),
+      'role': role.name,
     };
   }
 
@@ -42,6 +58,9 @@ class User {
       lastLoginAt: json['lastLoginAt'] != null
           ? DateTime.parse(json['lastLoginAt'] as String)
           : null,
+      role: json['role'] != null
+          ? UserRole.fromString(json['role'] as String)
+          : UserRole.user,
     );
   }
 }

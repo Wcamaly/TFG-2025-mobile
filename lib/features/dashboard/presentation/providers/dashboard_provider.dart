@@ -19,7 +19,10 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
 
   DashboardNotifier({
     required this.getCurrentStatsUseCase,
-  }) : super(const DashboardState.initial());
+  }) : super(const DashboardState.initial()) {
+    // Cargar estadísticas automáticamente al inicializar
+    loadStats();
+  }
 
   Future<void> loadStats() async {
     state = const DashboardState.loading();
@@ -30,5 +33,9 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       (failure) => DashboardState.error(failure.message),
       (stats) => DashboardState.loaded(stats),
     );
+  }
+
+  Future<void> refreshStats() async {
+    await loadStats();
   }
 }

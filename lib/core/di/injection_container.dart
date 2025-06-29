@@ -8,10 +8,30 @@ import 'package:dio/dio.dart';
 import 'package:tfg_2025_mobile/core/network/http_service.dart';
 import 'package:tfg_2025_mobile/core/network/dio_http_service.dart';
 import 'package:tfg_2025_mobile/firebase_options.dart';
-import '../../features/authentication/data/datasources/auth_remote_data_source.dart';
-import '../../features/authentication/data/datasources/auth_remote_data_source_mock.dart';
+import '../database/app_database.dart';
+import '../../features/authentication/data/datasources/auth_local_data_source.dart';
 import '../../features/authentication/data/repositories/auth_repository_impl.dart';
 import '../../features/authentication/domain/repositories/auth_repository.dart';
+import '../../features/trainer_dashboard/data/datasources/dashboard_local_data_source.dart';
+import '../../features/trainer_dashboard/data/repositories/dashboard_repository_impl.dart';
+import '../../features/trainer_dashboard/domain/repositories/dashboard_repository.dart';
+import '../../features/trainer_dashboard/domain/usecases/get_dashboard_stats_usecase.dart';
+import '../../features/trainer_routines/data/datasources/routines_local_data_source.dart';
+import '../../features/trainer_routines/data/repositories/routines_repository_impl.dart';
+import '../../features/trainer_routines/domain/repositories/routines_repository.dart';
+import '../../features/trainer_routines/domain/usecases/get_routines_usecase.dart';
+import '../../features/trainer_routines/domain/usecases/assign_routine_usecase.dart';
+import '../../features/trainer_routines/domain/usecases/get_student_assigned_routines_usecase.dart';
+import '../../features/dashboard/data/datasources/dashboard_routines_data_source.dart';
+import '../../features/workouts/data/services/workout_session_service.dart';
+import '../../features/trainer_products/data/datasources/trainer_products_local_data_source.dart';
+import '../../features/trainer_products/data/repositories/trainer_products_repository_impl.dart';
+import '../../features/trainer_products/domain/repositories/trainer_products_repository.dart';
+import '../../features/trainer_products/domain/usecases/get_trainer_products_usecase.dart';
+import '../../features/trainer_products/domain/usecases/create_trainer_product_usecase.dart';
+import '../../features/trainer_products/domain/usecases/update_trainer_product_usecase.dart';
+import '../../features/trainer_products/domain/usecases/delete_trainer_product_usecase.dart';
+import '../../features/trainer_products/domain/usecases/toggle_product_status_usecase.dart';
 
 final sl = GetIt.instance;
 
@@ -34,6 +54,9 @@ Future<void> initializeDependencies() async {
     };
   }
 
+  // Core - Database
+  sl.registerLazySingleton<AppDatabase>(() => AppDatabase());
+
   // Core - Network
   sl.registerLazySingleton<Dio>(() => Dio());
   sl.registerLazySingleton<HttpService>(() => DioHttpService(
@@ -41,16 +64,89 @@ Future<void> initializeDependencies() async {
       ));
 
   // Features - Data Sources
-  sl.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceMock(),
+  sl.registerLazySingleton<AuthLocalDataSource>(
+    () => AuthLocalDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<DashboardLocalDataSource>(
+    () => DashboardLocalDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<RoutinesLocalDataSource>(
+    () => RoutinesLocalDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<TrainerProductsLocalDataSource>(
+    () => TrainerProductsLocalDataSourceImpl(sl()),
   );
 
   // Features - Repositories
   sl.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(remoteDataSource: sl()),
+    () => AuthRepositoryImpl(localDataSource: sl()),
+  );
+  sl.registerLazySingleton<DashboardRepository>(
+    () => DashboardRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton<RoutinesRepository>(
+    () => RoutinesRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton<TrainerProductsRepository>(
+    () => TrainerProductsRepositoryImpl(sl()),
   );
 
   // Features - Use Cases
+  sl.registerLazySingleton<GetDashboardStatsUseCase>(
+    () => GetDashboardStatsUseCase(sl()),
+  );
+  sl.registerLazySingleton<GetRoutinesUseCase>(
+    () => GetRoutinesUseCase(sl()),
+  );
+  // TODO: Uncomment when these use cases are created
+  // sl.registerLazySingleton<CreateRoutineUseCase>(
+  //   () => CreateRoutineUseCase(sl()),
+  // );
+  // sl.registerLazySingleton<UpdateRoutineUseCase>(
+  //   () => UpdateRoutineUseCase(sl()),
+  // );
+  // sl.registerLazySingleton<DeleteRoutineUseCase>(
+  //   () => DeleteRoutineUseCase(sl()),
+  // );
+  // sl.registerLazySingleton<SearchRoutinesUseCase>(
+  //   () => SearchRoutinesUseCase(sl()),
+  // );
+  // sl.registerLazySingleton<DuplicateRoutineUseCase>(
+  //   () => DuplicateRoutineUseCase(sl()),
+  // );
+  sl.registerLazySingleton<AssignRoutineUseCase>(
+    () => AssignRoutineUseCase(sl()),
+  );
+  sl.registerLazySingleton<GetStudentAssignedRoutinesUseCase>(
+    () => GetStudentAssignedRoutinesUseCase(sl()),
+  );
+
+  // Trainer Products Use Cases
+  sl.registerLazySingleton<GetTrainerProductsUseCase>(
+    () => GetTrainerProductsUseCase(sl()),
+  );
+  sl.registerLazySingleton<CreateTrainerProductUseCase>(
+    () => CreateTrainerProductUseCase(sl()),
+  );
+  sl.registerLazySingleton<UpdateTrainerProductUseCase>(
+    () => UpdateTrainerProductUseCase(sl()),
+  );
+  sl.registerLazySingleton<DeleteTrainerProductUseCase>(
+    () => DeleteTrainerProductUseCase(sl()),
+  );
+  sl.registerLazySingleton<ToggleProductStatusUseCase>(
+    () => ToggleProductStatusUseCase(sl()),
+  );
 
   // Features - Controllers/ViewModels
+
+  // Dashboard Routines
+  sl.registerLazySingleton<DashboardRoutinesDataSource>(
+    () => DashboardRoutinesDataSourceImpl(sl<AppDatabase>()),
+  );
+
+  // Workout Session Service
+  sl.registerLazySingleton<WorkoutSessionService>(
+    () => WorkoutSessionService(sl<AppDatabase>()),
+  );
 }

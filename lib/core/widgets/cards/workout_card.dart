@@ -22,8 +22,19 @@ class WorkoutCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('💪 WorkoutCard: Building workout card');
+    print('   Title: $title');
+    print('   Subtitle: $subtitle');
+    print('   Image URL: $imageUrl');
+    print('   Rating: $rating');
+    print('   Progress: $progress');
+    print('   Has onTap: ${onTap != null}');
+
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        print('💪 WorkoutCard: Card tapped - "$title"');
+        onTap?.call();
+      },
       child: Card(
         clipBehavior: Clip.antiAlias,
         child: Container(

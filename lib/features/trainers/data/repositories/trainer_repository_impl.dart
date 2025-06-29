@@ -3,12 +3,12 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/trainer.dart';
 import '../../domain/repositories/trainer_repository.dart';
-import '../datasources/trainer_remote_data_source.dart';
+import '../datasources/trainer_local_data_source.dart';
 
 class TrainerRepositoryImpl implements TrainerRepository {
-  final TrainerRemoteDataSource remoteDataSource;
+  final TrainerLocalDataSource localDataSource;
 
-  TrainerRepositoryImpl({required this.remoteDataSource});
+  TrainerRepositoryImpl({required this.localDataSource});
 
   @override
   Future<Either<Failure, List<Trainer>>> getNearbyTrainers({
@@ -17,17 +17,13 @@ class TrainerRepositoryImpl implements TrainerRepository {
     double radiusKm = 10.0,
   }) async {
     try {
-      final trainers = await remoteDataSource.getNearbyTrainers(
-        latitude: latitude,
-        longitude: longitude,
-        radiusKm: radiusKm,
+      final trainers = await localDataSource.getTrainersByLocation(
+        latitude,
+        longitude,
+        radiusKm,
       );
       return Right(trainers);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message ?? 'Server error'));
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(message: e.message ?? 'Network error'));
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownFailure(message: e.toString()));
     }
   }
@@ -35,13 +31,9 @@ class TrainerRepositoryImpl implements TrainerRepository {
   @override
   Future<Either<Failure, List<Trainer>>> searchTrainers(String query) async {
     try {
-      final trainers = await remoteDataSource.searchTrainers(query);
+      final trainers = await localDataSource.searchTrainers(query);
       return Right(trainers);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message ?? 'Server error'));
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(message: e.message ?? 'Network error'));
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownFailure(message: e.toString()));
     }
   }
@@ -53,17 +45,13 @@ class TrainerRepositoryImpl implements TrainerRepository {
     double radiusKm,
   ) async {
     try {
-      final trainers = await remoteDataSource.getTrainersByLocation(
+      final trainers = await localDataSource.getTrainersByLocation(
         latitude,
         longitude,
         radiusKm,
       );
       return Right(trainers);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message ?? 'Server error'));
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(message: e.message ?? 'Network error'));
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownFailure(message: e.toString()));
     }
   }
@@ -71,13 +59,12 @@ class TrainerRepositoryImpl implements TrainerRepository {
   @override
   Future<Either<Failure, Trainer>> getTrainerById(String id) async {
     try {
-      final trainer = await remoteDataSource.getTrainerById(id);
+      final trainer = await localDataSource.getTrainerById(id);
+      if (trainer == null) {
+        return Left(UnknownFailure(message: 'Trainer not found'));
+      }
       return Right(trainer);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message ?? 'Server error'));
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(message: e.message ?? 'Network error'));
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownFailure(message: e.toString()));
     }
   }
@@ -85,13 +72,9 @@ class TrainerRepositoryImpl implements TrainerRepository {
   @override
   Future<Either<Failure, List<Trainer>>> getRecommendedTrainers() async {
     try {
-      final trainers = await remoteDataSource.getRecommendedTrainers();
+      final trainers = await localDataSource.getRecommendedTrainers();
       return Right(trainers);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message ?? 'Server error'));
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(message: e.message ?? 'Network error'));
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownFailure(message: e.toString()));
     }
   }

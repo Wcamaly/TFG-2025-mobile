@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'core/theme/app_theme.dart';
+import 'package:tfg_2025_mobile/core/database/tables/users_table.dart';
+import 'core/theme/theme_provider.dart' as theme_provider;
 import 'core/providers/locale_provider.dart';
 import 'core/di/injection_container.dart';
+import 'core/database/app_database.dart';
 import 'core/config/env_config.dart';
 import 'core/config/remote_config_service.dart';
 import 'core/routes/app_router.dart';
@@ -15,6 +17,7 @@ import 'features/authentication/presentation/pages/register_page.dart';
 import 'features/authentication/presentation/pages/forgot_password_page.dart';
 import 'features/dashboard/presentation/pages/dashboard_page.dart';
 import 'features/authentication/presentation/providers/auth_provider.dart';
+import 'features/authentication/domain/entities/user.dart';
 import 'features/onboarding/presentation/providers/onboarding_provider.dart';
 import 'features/trainers/presentation/pages/trainer_search_page.dart';
 import 'features/trainers/presentation/pages/trainer_detail_page.dart';
@@ -42,9 +45,13 @@ void main() async {
   // Initialize other dependencies
   await initializeDependencies();
 
+  // Ensure seed data is loaded
+  final database = sl<AppDatabase>();
+  await database.ensureSeedData();
+
   runApp(
     EasyLocalization(
-      supportedLocales: const [Locale('en'), Locale('es')],
+      supportedLocales: const [Locale('en'), Locale('es'), Locale('fr')],
       path: 'assets/translations',
       fallbackLocale: const Locale('en'),
       child: const ProviderScope(child: MyApp()),
@@ -57,11 +64,13 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(theme_provider.themeProvider);
+
     return MaterialApp(
       title: 'Gymnestic',
-      theme: AppTheme.darkTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      theme: theme_provider.AppTheme.lightTheme,
+      darkTheme: theme_provider.AppTheme.darkTheme,
+      themeMode: themeMode,
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
@@ -107,8 +116,11 @@ class _AppInitializerState extends ConsumerState<AppInitializer> {
     authState.when(
       initial: () => Navigator.pushReplacementNamed(context, '/splash'),
       loading: () => Navigator.pushReplacementNamed(context, '/splash'),
-      authenticated: (user) =>
-          Navigator.pushReplacementNamed(context, '/dashboard'),
+      authenticated: (user) {
+        final route =
+            user.role == UserRole.trainer ? '/trainer-dashboard' : '/dashboard';
+        Navigator.pushReplacementNamed(context, route);
+      },
       unauthenticated: (message) =>
           Navigator.pushReplacementNamed(context, '/login'),
     );

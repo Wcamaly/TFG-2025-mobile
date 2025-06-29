@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'package:tfg_2025_mobile/core/database/tables/users_table.dart';
+
 import '../../../../core/error/exceptions.dart';
 import '../models/user_model.dart';
+import '../../domain/entities/user.dart';
 import 'auth_remote_data_source.dart';
 
 class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
@@ -8,6 +11,30 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
       StreamController<UserModel?>.broadcast();
 
   UserModel? _currentUser;
+
+  // Usuarios de demo
+  static final List<UserModel> _demoUsers = [
+    UserModel(
+      id: 'user_1',
+      email: 'usuario@demo.com',
+      name: 'María González',
+      photoUrl: null,
+      isEmailVerified: true,
+      createdAt: DateTime.now(),
+      lastLoginAt: DateTime.now(),
+      role: UserRole.user,
+    ),
+    UserModel(
+      id: 'trainer_1',
+      email: 'entrenador@demo.com',
+      name: 'Carlos Rodríguez',
+      photoUrl: null,
+      isEmailVerified: true,
+      createdAt: DateTime.now(),
+      lastLoginAt: DateTime.now(),
+      role: UserRole.trainer,
+    ),
+  ];
 
   @override
   Future<UserModel> signInWithEmailAndPassword({
@@ -29,15 +56,35 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
       throw BadRequestException('Password must be at least 6 characters');
     }
 
-    // Simular usuario mock
+    // Buscar usuario de demo por email
+    UserModel? demoUser;
+    try {
+      demoUser = _demoUsers.firstWhere(
+          (user) => user.email.toLowerCase() == email.toLowerCase());
+    } catch (e) {
+      // Si no encuentra usuario de demo, crear uno genérico
+      demoUser = UserModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        email: email,
+        name: 'Usuario Genérico',
+        photoUrl: null,
+        isEmailVerified: true,
+        createdAt: DateTime.now(),
+        lastLoginAt: DateTime.now(),
+        role: UserRole.user,
+      );
+    }
+
+    // Actualizar lastLoginAt
     final user = UserModel(
-      id: '1',
-      email: email,
-      name: 'John Doe',
-      photoUrl: null,
-      isEmailVerified: true,
-      createdAt: DateTime.now(),
+      id: demoUser.id,
+      email: demoUser.email,
+      name: demoUser.name,
+      photoUrl: demoUser.photoUrl,
+      isEmailVerified: demoUser.isEmailVerified,
+      createdAt: demoUser.createdAt,
       lastLoginAt: DateTime.now(),
+      role: demoUser.role,
     );
 
     _currentUser = user;
@@ -74,6 +121,7 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
       isEmailVerified: false,
       createdAt: DateTime.now(),
       lastLoginAt: DateTime.now(),
+      role: UserRole.user, // Por defecto nuevos usuarios son tipo user
     );
 
     _currentUser = user;
@@ -94,6 +142,7 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
       isEmailVerified: true,
       createdAt: DateTime.now(),
       lastLoginAt: DateTime.now(),
+      role: UserRole.user,
     );
 
     _currentUser = user;
@@ -132,4 +181,7 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
   void dispose() {
     _authStateController.close();
   }
+
+  // Método helper para obtener usuarios de demo (útil para testing)
+  static List<UserModel> get demoUsers => List.unmodifiable(_demoUsers);
 }

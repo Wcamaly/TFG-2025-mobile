@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:tfg_2025_mobile/core/database/tables/users_table.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/user.dart';
 
@@ -12,6 +13,7 @@ abstract class AuthRepository {
     required String email,
     required String password,
     required String name,
+    UserRole role = UserRole.user,
   });
 
   Future<Either<Failure, User>> signInWithGoogle();

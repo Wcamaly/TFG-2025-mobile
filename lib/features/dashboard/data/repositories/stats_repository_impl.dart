@@ -1,51 +1,53 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/database/app_database.dart';
 import '../../domain/entities/user_stats.dart';
 import '../../domain/repositories/stats_repository.dart';
-import '../datasources/stats_remote_data_source.dart';
+import '../datasources/stats_local_data_source.dart';
 
 class StatsRepositoryImpl implements StatsRepository {
-  final StatsRemoteDataSource remoteDataSource;
+  final StatsLocalDataSource _localDataSource;
+  final AppDatabase _database;
 
-  StatsRepositoryImpl(this.remoteDataSource);
+  StatsRepositoryImpl(this._localDataSource, this._database);
 
-  static final _mockStats = UserStats(
-    calories: 1800,
-    heartRate: 75,
-    weight: 70.5,
-    workoutMinutes: 45,
-    workoutsCompleted: 3,
-    weeklyProgress: [
-      DailyProgress(
-        date: DateTime(2024, 3, 1),
-        calories: 1800,
-        steps: 8000,
-        weight: 70.5,
-      ),
-      DailyProgress(
-        date: DateTime(2024, 3, 2),
-        calories: 2000,
-        steps: 10000,
-        weight: 70.4,
-      ),
-    ],
-  );
-
-  @override
-  Future<Either<Failure, UserStats>> getCurrentStats() async {
+  // Obtener el ID del usuario autenticado desde la base de datos
+  Future<int?> _getCurrentUserId() async {
     try {
-      final stats = await remoteDataSource.getCurrentStats();
-      return Right(stats);
+      // Obtener el primer usuario activo (asumiendo que es el usuario actual)
+      final users = await _database.getAllUsers();
+      final activeUser = users.where((user) => user.isActive).firstOrNull;
+      return activeUser?.id;
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      print('Error getting current user ID: $e');
+      return null;
     }
   }
 
   @override
-  Future<Either<Failure, void>> updateStats(UserStats stats) async {
+  Future<Either<Failure, UserStats>> getCurrentStats() async {
     try {
-      await remoteDataSource.updateStats(stats);
-      return const Right(null);
+      final userId = await _getCurrentUserId();
+      if (userId == null) {
+        return Left(ServerFailure(message: 'Usuario no autenticado'));
+      }
+
+      final stats = await _localDataSource.getCurrentStats(userId);
+      if (stats == null) {
+        // Si no hay estadísticas, crear unas por defecto
+        final defaultStats = UserStats(
+          calories: 0,
+          heartRate: 0,
+          weight: 0.0,
+          workoutMinutes: 0,
+          workoutsCompleted: 0,
+          weeklyProgress: [],
+        );
+        return Right(defaultStats);
+      }
+
+      return Right(stats);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
@@ -54,7 +56,13 @@ class StatsRepositoryImpl implements StatsRepository {
   @override
   Future<Either<Failure, List<DailyProgress>>> getWeeklyProgress() async {
     try {
-      return Right(_mockStats.weeklyProgress);
+      final userId = await _getCurrentUserId();
+      if (userId == null) {
+        return Left(ServerFailure(message: 'Usuario no autenticado'));
+      }
+
+      final progress = await _localDataSource.getWeeklyProgress(userId);
+      return Right(progress);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
@@ -63,7 +71,12 @@ class StatsRepositoryImpl implements StatsRepository {
   @override
   Future<Either<Failure, void>> updateWeight(double weight) async {
     try {
-      // Aquí actualizarías el peso en una implementación real
+      final userId = await _getCurrentUserId();
+      if (userId == null) {
+        return Left(ServerFailure(message: 'Usuario no autenticado'));
+      }
+
+      await _localDataSource.updateWeight(userId, weight);
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
@@ -73,7 +86,12 @@ class StatsRepositoryImpl implements StatsRepository {
   @override
   Future<Either<Failure, void>> updateCalories(int calories) async {
     try {
-      // Aquí actualizarías las calorías en una implementación real
+      final userId = await _getCurrentUserId();
+      if (userId == null) {
+        return Left(ServerFailure(message: 'Usuario no autenticado'));
+      }
+
+      await _localDataSource.updateCalories(userId, calories);
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
@@ -83,7 +101,12 @@ class StatsRepositoryImpl implements StatsRepository {
   @override
   Future<Either<Failure, void>> updateHeartRate(int heartRate) async {
     try {
-      // Aquí actualizarías la frecuencia cardíaca en una implementación real
+      final userId = await _getCurrentUserId();
+      if (userId == null) {
+        return Left(ServerFailure(message: 'Usuario no autenticado'));
+      }
+
+      await _localDataSource.updateHeartRate(userId, heartRate);
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));

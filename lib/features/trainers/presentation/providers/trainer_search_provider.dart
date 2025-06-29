@@ -1,12 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/trainer.dart';
 import '../../data/repositories/trainer_repository_impl.dart';
-import '../../data/datasources/trainer_remote_data_source_mock.dart';
+import '../../data/datasources/trainer_local_data_source.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/database/app_database.dart';
+
+final trainerLocalDataSourceProvider = Provider((ref) {
+  final database = sl<AppDatabase>();
+  return TrainerLocalDataSourceImpl(database);
+});
 
 final trainerRepositoryProvider = Provider((ref) {
-  return TrainerRepositoryImpl(
-    remoteDataSource: TrainerRemoteDataSourceMock(),
-  );
+  final localDataSource = ref.watch(trainerLocalDataSourceProvider);
+  return TrainerRepositoryImpl(localDataSource: localDataSource);
 });
 
 final trainerSearchProvider =

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:tfg_2025_mobile/core/database/tables/users_table.dart';
 import '../../../../core/widgets/inputs/custom_text_field.dart';
 import '../../../../core/widgets/buttons/primary_button.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../providers/auth_provider.dart';
+import '../../domain/entities/user.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -22,6 +24,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  UserRole _selectedRole = UserRole.user;
 
   @override
   void dispose() {
@@ -39,7 +42,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         initial: () {},
         loading: () {},
         authenticated: (user) {
-          Navigator.pushReplacementNamed(context, '/dashboard');
+          final route = user.role == UserRole.trainer
+              ? '/trainer-dashboard'
+              : '/dashboard';
+          Navigator.pushReplacementNamed(context, route);
         },
         unauthenticated: (message) {
           if (message != 'No user found') {
@@ -101,6 +107,144 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
                 ),
                 const SizedBox(height: 40),
+
+                // Role Selection
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.divider,
+                      width: 1,
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Account Type',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _selectedRole = UserRole.user;
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: _selectedRole == UserRole.user
+                                      ? AppColors.primary.withOpacity(0.1)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: _selectedRole == UserRole.user
+                                        ? AppColors.primary
+                                        : AppColors.divider,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.fitness_center,
+                                      color: _selectedRole == UserRole.user
+                                          ? AppColors.primary
+                                          : AppColors.textSecondary,
+                                      size: 32,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'User',
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        color: _selectedRole == UserRole.user
+                                            ? AppColors.primary
+                                            : AppColors.textSecondary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Track workouts\nand nutrition',
+                                      textAlign: TextAlign.center,
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _selectedRole = UserRole.trainer;
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: _selectedRole == UserRole.trainer
+                                      ? AppColors.primary.withOpacity(0.1)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: _selectedRole == UserRole.trainer
+                                        ? AppColors.primary
+                                        : AppColors.divider,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.school,
+                                      color: _selectedRole == UserRole.trainer
+                                          ? AppColors.primary
+                                          : AppColors.textSecondary,
+                                      size: 32,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Trainer',
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        color: _selectedRole == UserRole.trainer
+                                            ? AppColors.primary
+                                            : AppColors.textSecondary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Manage clients\nand routines',
+                                      textAlign: TextAlign.center,
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
 
                 // Name Field
                 CustomTextField(
@@ -229,6 +373,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             email: _emailController.text.trim(),
                             password: _passwordController.text,
                             name: _nameController.text.trim(),
+                            role: _selectedRole,
                           );
                     }
                   },

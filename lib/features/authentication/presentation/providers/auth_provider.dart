@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tfg_2025_mobile/core/database/tables/users_table.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/database/app_database.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../../data/repositories/auth_repository_impl.dart';
-import '../../data/datasources/auth_remote_data_source_mock.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepositoryImpl(
-    remoteDataSource: AuthRemoteDataSourceMock(),
-  );
+  return sl<AuthRepository>();
 });
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
@@ -52,12 +51,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String email,
     required String password,
     required String name,
+    UserRole role = UserRole.user,
   }) async {
     state = const AuthState.loading();
     final result = await _authRepository.signUpWithEmailAndPassword(
       email: email,
       password: password,
       name: name,
+      role: role,
     );
     result.fold(
       (failure) => state = AuthState.unauthenticated(failure.message),
@@ -85,6 +86,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> resetPassword(String email) async {
     final result = await _authRepository.resetPassword(email);
     // Handle reset password result if needed
+  }
+
+  // Método temporal para resetear la base de datos
+  Future<void> resetDatabase() async {
+    final database = sl<AppDatabase>();
+    await database.resetDatabaseForTrainer(
+        0); // El parámetro no se usa, se obtiene del JSON
+    print('Base de datos reseteada completamente con datos seed');
+  }
+
+  // Método temporal para listar todos los usuarios (debugging)
+  Future<void> listAllUsers() async {
+    try {
+      final database = sl<AppDatabase>();
+      final users = await database.select(database.users).get();
+      print('=== USUARIOS EN LA BASE DE DATOS ===');
+      for (final user in users) {
+        print(
+            'ID: ${user.id}, Email: ${user.email}, Nombre: ${user.firstName} ${user.lastName}, Rol: ${user.role}');
+      }
+      print('=== FIN DE LA LISTA ===');
+    } catch (e) {
+      print('Error al listar usuarios: $e');
+    }
   }
 }
 

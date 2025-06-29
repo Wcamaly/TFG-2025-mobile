@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/inputs/search_bar.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/database/app_database.dart';
 import '../widgets/trainer_map_view.dart';
 import '../widgets/trainer_list_item.dart';
 import '../providers/trainer_search_provider.dart';
@@ -70,8 +73,40 @@ class _TrainerSearchPageState extends ConsumerState<TrainerSearchPage> {
 
                   // View toggle
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // Botón temporal para insertar entrenadores de ejemplo
+                      if (kDebugMode)
+                        ElevatedButton.icon(
+                          onPressed: () async {
+                            try {
+                              final database = sl<AppDatabase>();
+                              await database.insertSampleUsers();
+                              // Recargar la búsqueda
+                              ref
+                                  .read(trainerSearchProvider.notifier)
+                                  .searchTrainers('');
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      '✅ Usuarios de ejemplo insertados (entrenadores y estudiantes)'),
+                                ),
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('❌ Error: $e'),
+                                ),
+                              );
+                            }
+                          },
+                          icon: const Icon(Icons.add, size: 16),
+                          label: const Text('Insertar Usuarios'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.success,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
                       Container(
                         decoration: BoxDecoration(
                           color: AppColors.background,
