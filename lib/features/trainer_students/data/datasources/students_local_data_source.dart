@@ -13,6 +13,16 @@ abstract class StudentsLocalDataSource {
   Future<void> assignStudentToTrainer(int studentId, int trainerId);
   Future<void> removeStudentFromTrainer(int studentId);
   Future<void> updateStudentNotes(int studentId, String notes);
+  Future<int> createStudentAssociation({
+    required int userId,
+    required int trainerId,
+    required SubscriptionType subscriptionType,
+    required double monthlyFee,
+    required int totalClasses,
+    required DateTime subscriptionStartDate,
+    required DateTime subscriptionEndDate,
+    String? notes,
+  });
 }
 
 class StudentWithUser {
@@ -141,5 +151,33 @@ class StudentsLocalDataSourceImpl implements StudentsLocalDataSource {
       notes: Value(notes.isEmpty ? null : notes),
       updatedAt: Value(DateTime.now()),
     ));
+  }
+
+  @override
+  Future<int> createStudentAssociation({
+    required int userId,
+    required int trainerId,
+    required SubscriptionType subscriptionType,
+    required double monthlyFee,
+    required int totalClasses,
+    required DateTime subscriptionStartDate,
+    required DateTime subscriptionEndDate,
+    String? notes,
+  }) async {
+    final companion = StudentsCompanion.insert(
+      userId: userId,
+      trainerId: trainerId,
+      status: StudentStatus.active,
+      subscriptionType: subscriptionType,
+      subscriptionStartDate: subscriptionStartDate,
+      subscriptionEndDate: subscriptionEndDate,
+      remainingClasses: Value(totalClasses),
+      totalClasses: Value(totalClasses),
+      monthlyFee: monthlyFee,
+      nextPaymentDate: subscriptionStartDate.add(const Duration(days: 30)),
+      notes: Value(notes),
+    );
+
+    return await database.students.insertOne(companion);
   }
 }

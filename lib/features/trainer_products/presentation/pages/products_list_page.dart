@@ -29,6 +29,8 @@ class _ProductsListPageState extends ConsumerState<ProductsListPage> {
     super.initState();
     // Cargar productos al inicializar
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      print(
+          '[ProductsListPage] 🔄 Iniciando carga de productos para trainer ${widget.trainerId}');
       ref.read(trainerProductsProvider.notifier).loadProducts(widget.trainerId);
     });
   }
@@ -530,43 +532,37 @@ class _ProductsListPageState extends ConsumerState<ProductsListPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Row(
+                Column(
                   children: [
-                    Expanded(
-                      flex: 2,
-                      child: TextField(
-                        controller: priceController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'price'.tr(),
-                          border: const OutlineInputBorder(),
-                        ),
+                    TextField(
+                      controller: priceController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'price'.tr(),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      flex: 1,
-                      child: DropdownButtonFormField<Currency>(
-                        value: selectedCurrency,
-                        decoration: InputDecoration(
-                          labelText: 'currency'.tr(),
-                          border: const OutlineInputBorder(),
-                        ),
-                        items: Currency.values
-                            .map((currency) => DropdownMenuItem(
-                                  value: currency,
-                                  child: Text(
-                                      '${currency.symbol} ${currency.code}'),
-                                ))
-                            .toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setDialogState(() {
-                              selectedCurrency = value;
-                            });
-                          }
-                        },
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<Currency>(
+                      value: selectedCurrency,
+                      decoration: InputDecoration(
+                        labelText: 'currency'.tr(),
+                        border: const OutlineInputBorder(),
                       ),
+                      items: Currency.values
+                          .map((currency) => DropdownMenuItem(
+                                value: currency,
+                                child:
+                                    Text('${currency.symbol} ${currency.code}'),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setDialogState(() {
+                            selectedCurrency = value;
+                          });
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -696,7 +692,7 @@ class _ProductsListPageState extends ConsumerState<ProductsListPage> {
                     category: selectedCategory,
                     features: validFeatures,
                     isPopular: isPopular,
-                    status: ProductStatus.draft,
+                    status: ProductStatus.active,
                     createdAt: DateTime.now(),
                     updatedAt: DateTime.now(),
                   );
@@ -705,6 +701,8 @@ class _ProductsListPageState extends ConsumerState<ProductsListPage> {
                       .read(trainerProductsProvider.notifier)
                       .createProduct(product);
                   Navigator.pop(context);
+
+                  print('[ProductsListPage] ✅ Producto creado exitosamente');
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('productCreated'.tr())),
@@ -775,43 +773,37 @@ class _ProductsListPageState extends ConsumerState<ProductsListPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Row(
+                Column(
                   children: [
-                    Expanded(
-                      flex: 2,
-                      child: TextField(
-                        controller: priceController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'price'.tr(),
-                          border: const OutlineInputBorder(),
-                        ),
+                    TextField(
+                      controller: priceController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'price'.tr(),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      flex: 1,
-                      child: DropdownButtonFormField<Currency>(
-                        value: selectedCurrency,
-                        decoration: InputDecoration(
-                          labelText: 'currency'.tr(),
-                          border: const OutlineInputBorder(),
-                        ),
-                        items: Currency.values
-                            .map((currency) => DropdownMenuItem(
-                                  value: currency,
-                                  child: Text(
-                                      '${currency.symbol} ${currency.code}'),
-                                ))
-                            .toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setDialogState(() {
-                              selectedCurrency = value;
-                            });
-                          }
-                        },
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<Currency>(
+                      value: selectedCurrency,
+                      decoration: InputDecoration(
+                        labelText: 'currency'.tr(),
+                        border: const OutlineInputBorder(),
                       ),
+                      items: Currency.values
+                          .map((currency) => DropdownMenuItem(
+                                value: currency,
+                                child:
+                                    Text('${currency.symbol} ${currency.code}'),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setDialogState(() {
+                            selectedCurrency = value;
+                          });
+                        }
+                      },
                     ),
                   ],
                 ),

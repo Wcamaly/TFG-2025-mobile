@@ -1,8 +1,12 @@
+import 'package:dartz/dartz.dart';
 import '../../domain/entities/student.dart';
 import '../../domain/repositories/students_repository.dart';
+import '../../domain/usecases/associate_student_with_trainer_usecase.dart';
 import '../datasources/students_local_data_source.dart';
 import '../../../trainer_dashboard/domain/entities/student.dart' as dashboard;
 import '../../../../core/database/tables/students_table.dart' as db_tables;
+import '../../../../core/error/failures.dart';
+import '../../../../core/error/exceptions.dart';
 
 class StudentsRepositoryImpl implements StudentsRepository {
   final StudentsLocalDataSource localDataSource;
@@ -57,6 +61,37 @@ class StudentsRepositoryImpl implements StudentsRepository {
   @override
   Future<void> updateStudentNotes(int studentId, String notes) async {
     await localDataSource.updateStudentNotes(studentId, notes);
+  }
+
+  @override
+  Future<Either<Failure, Student>> createStudentAssociation(
+      AssociateStudentParams params) async {
+    try {
+      final studentId = await localDataSource.createStudentAssociation(
+        userId: params.userId,
+        trainerId: params.trainerId,
+        subscriptionType: _mapSubscriptionTypeToDb(params.subscriptionType),
+        monthlyFee: params.monthlyFee,
+        totalClasses: params.totalClasses,
+        subscriptionStartDate: params.subscriptionStartDate,
+        subscriptionEndDate: params.subscriptionEndDate,
+        notes: params.notes,
+      );
+
+      final studentWithUser = await localDataSource.getStudentById(studentId);
+      if (studentWithUser == null) {
+        return Left(
+            ServerFailure(message: 'Error creating student association'));
+      }
+
+      return Right(_mapToEntity(studentWithUser));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(
+          message: e.message ?? 'Error creating student association'));
+    } catch (e) {
+      return Left(ServerFailure(
+          message: 'Unexpected error creating student association'));
+    }
   }
 
   dashboard.Student _mapToEntity(StudentWithUser studentWithUser) {
@@ -119,6 +154,18 @@ class StudentsRepositoryImpl implements StudentsRepository {
         return db_tables.StudentStatus.inactive;
       case StudentStatus.suspended:
         return db_tables.StudentStatus.suspended;
+    }
+  }
+
+  db_tables.SubscriptionType _mapSubscriptionTypeToDb(
+      SubscriptionType domainType) {
+    switch (domainType) {
+      case SubscriptionType.basic:
+        return db_tables.SubscriptionType.basic;
+      case SubscriptionType.premium:
+        return db_tables.SubscriptionType.premium;
+      case SubscriptionType.vip:
+        return db_tables.SubscriptionType.vip;
     }
   }
 }

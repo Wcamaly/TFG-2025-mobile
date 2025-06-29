@@ -1,0 +1,28 @@
+{
+  "dart.flutterLogFilter": [
+    "KeyUpEvent is dispatched, but the state shows that the physical key is not pressed",
+    "A KeyUpEvent is dispatched",
+    "HardwareKeyboard",
+    "physicalKey: PhysicalKeyboardKey",
+    "logicalKey: LogicalKeyboardKey"
+  ],
+  "dart.showIgnoreQuickFixes": false,
+  "dart.previewFlutterUiGuides": true,
+  "dart.previewFlutterUiGuidesCustomTracking": true,
+  "dart.debugExternalPackageLibraries": false,
+  "dart.debugSdkLibraries": false,
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true,
+    "**/.hg/store/**": true,
+    "**/build/**": true,
+    "**/.dart_tool/**": true
+  },
+  "search.exclude": {
+    "**/build": true,
+    "**/.dart_tool": true,
+    "**/.git": true,
+    "**/node_modules": true
+  }
+} 

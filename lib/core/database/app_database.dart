@@ -352,8 +352,7 @@ class AppDatabase extends _$AppDatabase {
   // Métodos para productos de entrenadores
   Future<List<DbTrainerProduct>> getProductsByTrainer(int trainerId) {
     return (select(trainerProducts)
-          ..where((tbl) => tbl.trainerId.equals(trainerId))
-          ..where((tbl) => tbl.status.equalsValue(ProductStatus.active)))
+          ..where((tbl) => tbl.trainerId.equals(trainerId)))
         .get();
   }
 

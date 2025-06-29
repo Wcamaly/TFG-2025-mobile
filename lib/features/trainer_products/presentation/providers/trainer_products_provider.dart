@@ -25,35 +25,83 @@ class TrainerProductsNotifier extends StateNotifier<TrainerProductsState> {
   }) : super(const TrainerProductsState());
 
   Future<void> loadProducts(int trainerId) async {
+    print('[Provider] 🔄 Loading products for trainer $trainerId');
     state = state.copyWith(isLoading: true, error: null);
 
     final result = await getProductsUseCase(trainerId);
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
-      (products) => state = state.copyWith(
-        isLoading: false,
-        products: products,
-        error: null,
-      ),
+      (failure) {
+        print('[Provider] ❌ Error loading products: ${failure.message}');
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+        );
+      },
+      (products) {
+        print(
+            '[Provider] ✅ Products loaded successfully: ${products.length} products');
+        print(
+            '[Provider] 🔄 Previous state had: ${state.products.length} products');
+
+        for (final product in products) {
+          print(
+              '[Provider] 📦 Product: ${product.name} (ID: ${product.id}, Status: ${product.status})');
+        }
+
+        // Verificar duplicaciones por ID
+        final productIds = products.map((p) => p.id).toList();
+        final uniqueIds = productIds.toSet();
+        if (productIds.length != uniqueIds.length) {
+          print('[Provider] ⚠️ DUPLICATED PRODUCTS DETECTED in loaded data!');
+        }
+
+        state = state.copyWith(
+          isLoading: false,
+          products: products,
+          error: null,
+        );
+      },
     );
   }
 
   Future<void> createProduct(TrainerProduct product) async {
+    print(
+        '[Provider] 🔄 Creating product: ${product.name} for trainer ${product.trainerId}');
     state = state.copyWith(isLoading: true, error: null);
 
     final result = await createProductUseCase(product);
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
+      (failure) {
+        print('[Provider] ❌ Error creating product: ${failure.message}');
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+        );
+      },
       (createdProduct) {
-        final updatedProducts = [...state.products, createdProduct];
+        print(
+            '[Provider] ✅ Product created successfully: ${createdProduct.name} (ID: ${createdProduct.id})');
+
+        // Verificar que no existe ya en la lista (prevenir duplicación)
+        final existingProductIndex =
+            state.products.indexWhere((p) => p.id == createdProduct.id);
+        List<TrainerProduct> updatedProducts;
+
+        if (existingProductIndex != -1) {
+          print(
+              '[Provider] ⚠️ Product already exists, updating instead of adding');
+          updatedProducts = state.products
+              .map((p) => p.id == createdProduct.id ? createdProduct : p)
+              .toList();
+        } else {
+          print('[Provider] ➕ Adding new product to list');
+          updatedProducts = [...state.products, createdProduct];
+        }
+
+        print(
+            '[Provider] 📋 Total products after creation: ${updatedProducts.length}');
         state = state.copyWith(
           isLoading: false,
           products: updatedProducts,
@@ -141,6 +189,20 @@ class TrainerProductsNotifier extends StateNotifier<TrainerProductsState> {
 
   void clearError() {
     state = state.copyWith(error: null);
+  }
+
+  /// Método para refrescar productos solo si es necesario
+  Future<void> refreshProductsIfNeeded(int trainerId) async {
+    print(
+        '[Provider] 🔍 Checking if products refresh is needed for trainer $trainerId');
+
+    // Solo refrescar si el estado actual está vacío o hay errores
+    if (state.products.isEmpty || state.error != null) {
+      print('[Provider] 🔄 Refreshing products due to empty state or errors');
+      await loadProducts(trainerId);
+    } else {
+      print('[Provider] ✅ Products state is healthy, no refresh needed');
+    }
   }
 }
 

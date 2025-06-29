@@ -32,6 +32,11 @@ import '../../features/trainer_products/domain/usecases/create_trainer_product_u
 import '../../features/trainer_products/domain/usecases/update_trainer_product_usecase.dart';
 import '../../features/trainer_products/domain/usecases/delete_trainer_product_usecase.dart';
 import '../../features/trainer_products/domain/usecases/toggle_product_status_usecase.dart';
+import '../../features/trainer_students/data/datasources/students_local_data_source.dart';
+import '../../features/trainer_students/data/repositories/students_repository_impl.dart';
+import '../../features/trainer_students/domain/repositories/students_repository.dart';
+import '../../features/trainer_students/domain/usecases/associate_student_with_trainer_usecase.dart';
+import '../../features/subscriptions/domain/usecases/process_subscription_payment_usecase.dart';
 
 final sl = GetIt.instance;
 
@@ -76,6 +81,9 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton<TrainerProductsLocalDataSource>(
     () => TrainerProductsLocalDataSourceImpl(sl()),
   );
+  sl.registerLazySingleton<StudentsLocalDataSource>(
+    () => StudentsLocalDataSourceImpl(sl()),
+  );
 
   // Features - Repositories
   sl.registerLazySingleton<AuthRepository>(
@@ -89,6 +97,9 @@ Future<void> initializeDependencies() async {
   );
   sl.registerLazySingleton<TrainerProductsRepository>(
     () => TrainerProductsRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton<StudentsRepository>(
+    () => StudentsRepositoryImpl(sl()),
   );
 
   // Features - Use Cases
@@ -136,6 +147,14 @@ Future<void> initializeDependencies() async {
   );
   sl.registerLazySingleton<ToggleProductStatusUseCase>(
     () => ToggleProductStatusUseCase(sl()),
+  );
+
+  // Student Association Use Cases
+  sl.registerLazySingleton<AssociateStudentWithTrainerUseCase>(
+    () => AssociateStudentWithTrainerUseCase(sl()),
+  );
+  sl.registerLazySingleton<ProcessSubscriptionPaymentUseCase>(
+    () => ProcessSubscriptionPaymentUseCase(sl()),
   );
 
   // Features - Controllers/ViewModels

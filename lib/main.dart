@@ -10,6 +10,7 @@ import 'core/database/app_database.dart';
 import 'core/config/env_config.dart';
 import 'core/config/remote_config_service.dart';
 import 'core/routes/app_router.dart';
+import 'core/utils/debug_utils.dart';
 import 'features/splash/presentation/pages/splash_page.dart';
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/authentication/presentation/pages/login_page.dart';
@@ -28,26 +29,38 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize debug utils and log filter FIRST
+  DebugUtils.initializeLogFilter();
+  DebugUtils.logInfo('🚀 Initializing Gymnestic App');
+
   // Initialize Easy Localization
   await EasyLocalization.ensureInitialized();
+  DebugUtils.logInfo('✅ Easy Localization initialized');
 
   // Initialize environment variables
   await EnvConfig.initialize();
+  DebugUtils.logInfo('✅ Environment config initialized');
 
   // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  DebugUtils.logInfo('✅ Firebase initialized');
 
   // Initialize Remote Config
   await RemoteConfigService.initialize();
+  DebugUtils.logInfo('✅ Remote Config initialized');
 
   // Initialize other dependencies
   await initializeDependencies();
+  DebugUtils.logInfo('✅ Dependencies initialized');
 
   // Ensure seed data is loaded
   final database = sl<AppDatabase>();
   await database.ensureSeedData();
+  DebugUtils.logInfo('✅ Seed data loaded');
+
+  DebugUtils.logSeparator('APP READY');
 
   runApp(
     EasyLocalization(

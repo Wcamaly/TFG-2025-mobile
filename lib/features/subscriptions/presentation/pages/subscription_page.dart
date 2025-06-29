@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/buttons/primary_button.dart';
 import '../../../../core/widgets/inputs/custom_text_field.dart';
 import '../../../trainers/domain/entities/trainer.dart';
+import '../../../authentication/presentation/providers/auth_provider.dart';
+import '../../domain/usecases/process_subscription_payment_usecase.dart';
+import '../../../../core/di/injection_container.dart';
 
-class SubscriptionPage extends StatefulWidget {
+class SubscriptionPage extends ConsumerStatefulWidget {
   final Trainer trainer;
   final TrainerPackage package;
 
@@ -16,10 +20,10 @@ class SubscriptionPage extends StatefulWidget {
   });
 
   @override
-  State<SubscriptionPage> createState() => _SubscriptionPageState();
+  ConsumerState<SubscriptionPage> createState() => _SubscriptionPageState();
 }
 
-class _SubscriptionPageState extends State<SubscriptionPage> {
+class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   final _formKey = GlobalKey<FormState>();
   final _cardNumberController = TextEditingController();
   final _nameController = TextEditingController();
@@ -345,72 +349,171 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       return;
     }
 
+    // Verificar que el usuario esté autenticado
+    final authState = ref.read(authProvider);
+
+    final user = authState.when(
+      initial: () => null,
+      loading: () => null,
+      authenticated: (user) => user,
+      unauthenticated: (message) => null,
+    );
+
+    if (user == null) {
+      _showErrorDialog('You must be logged in to make a payment');
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
-    // Simulate payment processing
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // Simulate payment processing delay
+      await Future.delayed(const Duration(seconds: 2));
 
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-
-      // Show success dialog
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          backgroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.check,
-                  color: AppColors.success,
-                  size: 40,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Payment Successful!',
-                style: AppTextStyles.headlineMedium.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Your subscription has been activated.',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              PrimaryButton(
-                text: 'Continue',
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close dialog
-                  Navigator.of(context).pop(); // Go back to trainer detail
-                  Navigator.of(context).pop(); // Go back to search
-                },
-              ),
-            ],
-          ),
-        ),
+      // Procesar suscripción y asociar usuario con entrenador
+      final processPaymentUseCase = sl<ProcessSubscriptionPaymentUseCase>();
+      final params = ProcessSubscriptionParams(
+        userId: int.parse(user.id),
+        trainerId: int.parse(widget.trainer.id),
+        package: widget.package,
+        paymentMethod: 'card',
+        paymentDetails: {
+          'cardNumber': _cardNumberController.text,
+          'cardHolder': _nameController.text,
+          'expiration': _expirationController.text,
+          'cvv': _cvvController.text,
+        },
       );
+
+      final result = await processPaymentUseCase(params);
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        result.fold(
+          (failure) => _showErrorDialog(failure.message),
+          (subscriptionResult) => _showSuccessDialog(subscriptionResult),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        _showErrorDialog('An error occurred while processing your payment: $e');
+      }
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.error.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.error_outline,
+                color: AppColors.error,
+                size: 40,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Payment Failed',
+              style: AppTextStyles.headlineMedium.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            PrimaryButton(
+              text: 'Try Again',
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSuccessDialog(SubscriptionResult result) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.success.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check,
+                color: AppColors.success,
+                size: 40,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Payment Successful!',
+              style: AppTextStyles.headlineMedium.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'You are now subscribed to ${widget.trainer.name}!\nTransaction ID: ${result.transactionId}',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            PrimaryButton(
+              text: 'Continue',
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop(); // Go back to trainer detail
+                Navigator.of(context).pop(); // Go back to search
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

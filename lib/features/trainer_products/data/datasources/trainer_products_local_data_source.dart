@@ -186,6 +186,11 @@ class TrainerProductsLocalDataSourceImpl
   @override
   Future<domain.TrainerProduct> createProduct(
       domain.TrainerProduct product) async {
+    print('[Datasource] 🔄 Creating product: ${product.name}');
+    print('[Datasource] 👤 TrainerId: ${product.trainerId}');
+    print('[Datasource] 💰 Price: ${product.price} ${product.currency}');
+    print('[Datasource] 📝 Status: ${product.status}');
+
     final productCompanion = TrainerProductsCompanion.insert(
       trainerId: product.trainerId,
       name: product.name,
@@ -200,7 +205,18 @@ class TrainerProductsLocalDataSourceImpl
       imageUrl: Value(product.imageUrl),
     );
 
+    print('[Datasource] 📦 ProductCompanion created successfully');
     final productId = await database.insertTrainerProduct(productCompanion);
+    print('[Datasource] ✅ Product inserted with ID: $productId');
+
+    // Verificar que se insertó correctamente
+    final insertedProduct = await database.getProductById(productId);
+    if (insertedProduct != null) {
+      print('[Datasource] ✅ Product verified in DB: ${insertedProduct.name}');
+    } else {
+      print('[Datasource] ❌ Product NOT found in DB after insertion!');
+    }
+
     return product.copyWith(id: productId);
   }
 
